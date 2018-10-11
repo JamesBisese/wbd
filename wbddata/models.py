@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import re
 
+# huc_code really needs to be \d{2,8} but users accidentally loose the leading zero when data is opened in MS Excel
 def validate_huc_code(value):
     reg = re.compile('^\d{1,8}$')
     if not reg.match(value) :
