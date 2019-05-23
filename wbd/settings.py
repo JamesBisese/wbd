@@ -12,6 +12,18 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 
+import logging.config
+from django.utils.log import DEFAULT_LOGGING
+
+"""
+    Note for running in dev and on IIS
+    for dev, this alias (url prefix) is blank
+    for IIS - use production.py settings, which loads base, then production where this is set to IIS's name
+    for the app (i.e. 'wbd/'
+
+"""
+IIS_APP_ALIAS = ''
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,6 +38,7 @@ SECRET_KEY = '!!!USE-VALUE-FROM-LOCAL-SETTINGS!!!'
 DEBUG = False
 
 ALLOWED_HOSTS = ['!!!USE-VALUE-FROM-LOCAL-SETTINGS!!!',]
+
 
 
 # Application definition
@@ -59,6 +72,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'wbd', 'templates'),
                  os.path.join(BASE_DIR, 'wbdmap', 'templates'),
                  os.path.join(BASE_DIR, 'wbdchart'),
 
@@ -125,6 +139,104 @@ USE_L10N = True
 
 USE_TZ = True
 
+'''
+    customize logging from https://gist.github.com/ipmb/0618f44dc5270f9a2be2826d0d933ed7
+'''
+# LOGGING_CONFIG = None
+
+# LOGLEVEL = os.environ.get('LOGLEVEL', 'info').upper()
+from datetime import date
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s %(module)s] %(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'developer': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'wbddata', 'static', 'log', 'debug_' + date.today().strftime('%d%m%Y') + '.log'),
+            'formatter':'simple',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'developer'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'django.db.backend': {
+            'handlers': ['console', 'developer'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'wbddata.models': {
+            'handlers': ['console', 'developer'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'wbddata.management.commands': {
+            'handlers': ['console', 'developer'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+# logging.config.dictConfig({
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'default': {
+#             # exact format is not important, this is the minimum information
+#             'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+#         },
+#         'django.server': DEFAULT_LOGGING['formatters']['django.server'],
+#     },
+#     'handlers': {
+#         # console logs to stderr
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'default',
+#         },
+#         # Add Handler for Sentry for `warning` and above
+#         # 'sentry': {
+#         #     'level': 'WARNING',
+#         #     'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+#         # },
+#         'django.server': DEFAULT_LOGGING['handlers']['django.server'],
+#     },
+#     'loggers': {
+#         # default for all undefined Python modules
+#         '': {
+#             'level': 'WARNING',
+#             'handlers': ['console'], # , 'sentry'],
+#         },
+#         # Our application code
+#         'wbddata.models': {
+#             'level': DEBUG,
+#             'handlers': ['console'], # , 'sentry'],
+#             # Avoid double logging because of root logger
+#             'propagate': False,
+#         },
+#         # Prevent noisy modules from logging to Sentry
+#         'noisy_module': {
+#             'level': 'ERROR',
+#             'handlers': ['console'],
+#             'propagate': False,
+#         },
+#         # Default runserver request logging
+#         'django.server': DEFAULT_LOGGING['loggers']['django.server'],
+#     },
+# })
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -134,6 +246,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = (os.path.join(BASE_DIR, 'static'))
 
 STATICFILES_DIRS = (
+  os.path.join(BASE_DIR, 'wbd', 'static'),
   os.path.join(BASE_DIR, 'wbdmap', 'static'),
   os.path.join(BASE_DIR, 'wbdchart', 'static'),
 )
@@ -148,7 +261,20 @@ these are used to load data initially
 '''
 HUC12_ATTRIBUTES_FILE = os.path.join(BASE_DIR, 'wbddata', 'static', 'data', 'huc12_attributes.csv')
 
+HUC12_ROUTE_FILE = os.path.join(BASE_DIR, 'wbddata', 'static', 'data', 'huc12_route.csv')
+
+HUC12_ROUTE_FILE_PICKLE = os.path.join(BASE_DIR, 'wbddata', 'static', 'data', 'navigator_huc12.p')
+
 HUC_FILE = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'huc_hydrologic_unit_codes.csv')
+
+WBD_ATTRIBUTES_LOOKUPLIST = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'wbd_attributes_lookuplist.csv')
+
+#TODO: figure a better way to be flexible here without needing this
+WBD_METRICS_2016 = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'metrics2016.csv')
+
+WBD_METRICS_2017 = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'metrics2017.csv')
+
+WBD_METRICS_2020 = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'metrics2020.csv')
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -157,17 +283,35 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_csv.renderers.CSVRenderer', #2019-05-05
         'rest_framework.renderers.StaticHTMLRenderer',
         'rest_framework.renderers.TemplateHTMLRenderer',
         'rest_framework_xml.renderers.XMLRenderer',
     ),
     'DEFAULT_PAGINATION_CLASS': 'wbddata.pagination.WBDCustomPagination',
-    'PAGE_SIZE': 10
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 11,
+
 }
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        # 'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,
+    },
+    'wbddata.navigation': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'django_cache'),
+        'TIMEOUT': None,
+    },
+    'wbddata.attributes': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'wbddata', 'static', 'data', 'django_cache'),
+        'TIMEOUT': None,
+    }
+}

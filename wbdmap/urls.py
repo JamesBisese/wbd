@@ -13,10 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
+from django.conf import settings
 from django.urls import path, include
-from .views import Index, IndexMap
+
+from .views import Index, IndexMap, OldMap, ElevationSlopeMap
+
+"""
+    this tag makes all the urls reverse into 'wbdmap:{name}'
+"""
+app_name = 'wbdmap'
+
 urlpatterns = [
     # path('index/', IndexMap),
-    path('', IndexMap),
+    path(settings.IIS_APP_ALIAS , IndexMap, name='index'),
+    path(settings.IIS_APP_ALIAS + 'old/', OldMap, name='old'),
+    path(settings.IIS_APP_ALIAS + 'slope/', ElevationSlopeMap, name='elevationslope'),
+
 ]

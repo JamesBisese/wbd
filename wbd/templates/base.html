@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load staticfiles %}
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}{% endblock description %}">
+    <link rel="shortcut icon" href="{% static 'costly/ico/logo_icon.ico' %}">
+
+    <title>{% block title %}WBD {% endblock %}</title>
+
+
+
+    {% block extra_css %}
+    {% endblock extra_css %}
+
+    <!-- Custom styles for this site -->
+    {% block styles %}
+    <link href="{% static 'costly/css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'costly/css/jquery-ui.css' %}" rel="stylesheet">
+    {% endblock styles %}
+
+    <!-- Custom tags for the head tag -->
+
+    <!-- block extrahead -->
+    {% block extrahead %}
+    {% endblock extrahead %}
+    <!-- endblock extrahead -->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+
+
+    <![endif]-->
+
+    {% block extra_javascript %}
+    {% endblock extra_javascript %}
+
+</head>
+
+<body>
+<div id="topheader">
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+
+
+{#      <button class="navbar-toggler " type="button" data-toggle="collapse" data-target="#navbarsExample05" aria-controls="navbarsExample05" aria-expanded="false" aria-label="Toggle navigation">#}
+{#        <span class="navbar-toggler-icon"></span>#}
+{#      </button>#}
+
+
+
+    </nav>
+</div>
+
+
+
+    {% block splash %}
+    {% endblock splash %}
+
+
+
+    {% block extra_js %}
+    {% endblock extra_js %}
+
+
+
+
+
+    <div class="container">
+
+        {% block content %}
+
+          <div class="starter-template">
+            <h1>New Project</h1>
+            <p class="lead">Use this document as a way to quickly start any new project.<br>
+                All you get is this text and a mostly barebones HTML document.</p>
+          </div>
+
+        {% endblock content %}
+
+        {% block scripts %}
+        {% endblock scripts %}
+    </div>
+
+    {% block new_extra_js %}
+    {% endblock %}
+
+    <!-- Site footer -->
+    {% block footer %}
+        <!-- Copyright notice -->
+        <a name="contact"></a>
+        <div class="container">
+            <div class="footer">
+                <div class="row">
+                    <div class="col-lg-6">
+                      <p>&copy; Tetra Tech, Inc {% now 'Y' %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock footer %}
+
+</body>
+</html>
+
+

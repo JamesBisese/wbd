@@ -1,18 +1,22 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html>
+<script src="{% static 'wbdmap/js/nprogress.js' %}"></script>
+<link rel='stylesheet' href="{% static 'wbdmap/js/nprogress.css' %}"/>
 <head>
 <meta charset="utf-8">
 <meta name="viewport"
 	content="initial-scale=1, maximum-scale=1,user-scalable=no">
-<title>EnviroAtlas HUC12 Navigator</title>
-<link rel="stylesheet"
-	href="https://js.arcgis.com/3.18/dijit/themes/tundra/tundra.css">
-<link rel="stylesheet"
-	href="https://js.arcgis.com/3.18/esri/css/esri.css">
-
+<title>Tt HUC12 Navigator</title>
+<link rel="stylesheet" href="https://js.arcgis.com/3.28/dijit/themes/tundra/tundra.css">
+<link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
 <link rel="stylesheet" href="{% static 'wbdmap/css/bootstrap.css' %}" type="text/css"/>
 <link rel="stylesheet" href="{% static 'wbdmap/css/app.css' %}" type="text/css"/>
+
+
+
+
 <style>
 html, body {
 	height: 100%;
@@ -25,24 +29,21 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+#attribute_selector {
+	position: absolute; 
+	top: 65px; 
+	left: 60px; 
+	z-index:100;
+}
 
-#controls {
-	position: absolute;
-	height: 330px;
-	width: 440px;
-	left: 10px;
-	font-family: arial;
-	bottom: 10px;
-	margin: 5px;
-	padding: 5px;
-	z-index: 40;
-	background: #fff;
-	color: #444;
-	-moz-box-shadow: 0 0 5px #888;
-	-webkit-box-shadow: 0 0 5px #888;
-	box-shadow: 0 0 5px #888;
-	overflow-y: auto;
-	border-radius: 5px;
+.dojoxGridScrollbox { overflow-x: hidden; }
+
+
+#grids {
+	overflow-y: scroll;
+	height: 350px;
+	width: 100%;
+	border-bottom: 1px solid;
 }
 
 pre img {
@@ -73,9 +74,75 @@ h3 {
 	top: 60px;
 	left: 20px;
 }
+
+#controls {
+	position: absolute;
+	height: 500px;
+	width: 440px;
+	left: 10px;
+	font-family: arial;
+	bottom: 5%;
+	margin: 5px;
+	padding: 5px;
+	z-index: 40;
+	background: #fff;
+	color: #444;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+
+	border-radius: 5px;
+}
+
+#titlePane {
+    width: 240px;
+}
+
+.claro .dijitTitlePaneTitle {
+    background: #fff;
+    font-weight: 600;
+    border: none;
+    border-bottom: solid 1px #29201A;
+    border-top: solid 1px #29201A;
+}
+
+.claro .dijitTitlePaneTitleHover {
+    background: #eee;
+}
+
+.claro .dijitTitlePaneTitleActive {
+    background: #808775;
+}
+
+.claro .dijitTitlePaneContentOuter {
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+}
+
+.dojoxFloatingPaneTitle, .reportTitlePane {
+    color: white;
+    background-color: #76a2c5;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: bold;
+    overflow: auto;
+}
+
+    .small {
+
+    }
 </style>
 
-<script src="https://js.arcgis.com/3.18/"></script>
+<script src="https://js.arcgis.com/3.28/"></script>
+
+<!-- debug is being used as a surrogate for Development vs. Production -->
+{% if debug %}
+    <script type="text/javascript" language="Javascript" src="{% static 'wbdmap/js/urls.js' %}"></script>
+{% else %}
+    <script type="text/javascript" language="Javascript" src="{% static 'wbdmap/js/urls_production.js' %}"></script>
+{% endif %}
+
 <script src="{% static 'wbdmap/js/index.js' %}"></script>
 
 
@@ -85,36 +152,82 @@ h3 {
 	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="navbar-header">
 			<img class="navbar-brand-icon" src="{% static 'wbdmap/images/enviroatlas_graphic_identifier.png' %}">
-			<a class="navbar-brand">EnviroAtlas HUC12 Navigator</a>
+			<a class="navbar-brand">Tetra Tech HUC12 Navigator</a>
 		</div>
 	</nav>
+	<div id='thin_blue_line' style="width: 100%; top:52px; height:15px;" ></div>
 	<div data-dojo-type="dijit.layout.BorderContainer"
 		data-dojo-props="design:'headline',gutters:false"
 		style="width: 100%; height: 100%; margin: 0;">
 		<div id="map" data-dojo-type="dijit.layout.ContentPane"
 			data-dojo-props="region:'center'">
+			<!-- leave this off for now - there is nothing in WBD model to handle it yet -->
+			<div id="attribute_selector" style="display: none;">
+				<select id="attribute">
+					<option value="NONE" selected="selected">-- Show Areas Only --</option>
+					<option value="SNFA_MEAN">Mean rate of synthetic N fertilizer application to agricultural lands in kg N/ha/yr</option>
+					<option value="ELEVMEAN">Mean Elevation (ft. above mean sea level)</option>
+					<option value="SLOPEMEAN">Mean Slope (ft/mile)</option>
+					<option value="STREAMDENSITY">The length of streams per 12-digit HUC in km, divided by the area in square km.</option>				  
+					<option value="N_INDEX">Percent area classified as natural land cover</option>				  
+					<option value="PAGT">Percent area classified as agriculture</option>				  
+					<option value="PFOR">Percent area classified as forest</option>				  
+					<option value="dwd_gal_per_day">Domestic Water Demand, gallons per day</option>
+				</select>
+			</div>
+			
+			<div id="controls" data-dojo-type="dojox/layout/FloatingPane"
+             data-dojo-props="resizable:false, dockable:true, closable:false, title:'EnviroAtlas HUC12 Navigator'" >
 
-			<div id="controls">
-				<h3>EnviroAtlas HUC12 Navigator</h3>
-					<div style="overflow: scroll;" id="body">
-
-					<div id="footer">
+				
+				<div id="user_options">
+                    <div style="display: inline-block; float:left; padding-right: 48px;">
+{#                        <label for="navigation_active">Active</label>#}
+{#                        <input id="navigation_active" type="checkbox" name="terms" checked />                        #}
+                        <input id="navigation_active" type="checkbox" name="terms" checked />Active
+                    </div>
+					<div id="navDirection" >Navigation direction:
+						<input type='radio' name='navigation_direction' ng-model='mValue' value='Upstream'  checked="checked" />Upstream/
+						<input type='radio' name='navigation_direction' ng-model='mValue' value='Downstream' />Downstream
 					</div>
-					
+                    <div id="navigation_controls_advanced" data-dojo-type="dijit/TitlePane"
+                         data-dojo-props="title: 'Advanced Controls', open:false">
+                        <div style="display: inline-block;">
+                            <div style="display: inline-block;">
+                                <input id = "show_all_huc12" type="checkbox" name="terms" checked />Show all navigated HUC12s
+                            </div>
+
+                        </div>
+                        <br>
+                        <label for="navigation_huc_code">HU8 or H12 HUC Code</label>
+                        <input type="text" id="navigation_huc_code" value="" />
+                    </div>
+                    <div id="results_download" data-dojo-type="dijit/TitlePane"
+                         data-dojo-props="title: 'Download/API', open:false">
+                        <div id="api_downstream" style="display:none"></div>
+                        <div id="api_upstream" style="display:none"></div>
+                        <div id="download_attributes" style="display:none"></div>
+                        <div id="download_metrics2016" style="display:none"></div>
+                        <div id="download_metrics2017" style="display:none"></div>
+                        <div id="download_geography" style="display:none"></div>
+                    </div>
 				</div>
 				<div id="results"></div>
-				<div id="gridHUC12"></div>
-				<p></p>
-				<div id="gridNavResults"></div>
-				<!-- <div style="position: absolute; bottom: 5px;"><input id = "termsCheck" type = "checkbox" name = "terms" />Show all navigated HUC12s</div> -->
+				<div id="grids" >
+					<div id="gridHUC12"></div>
+					<p></p>
+					<div id="gridAttributeResults"></div>
+					<p></p>
+					<div id="gridNavResults"></div>
+				</div>
+				<div id="footer">
+					
+				</div>
+
+				
 			</div>
 		<img id="loadingImg" src="{% static 'wbdmap/images/hourglass.gif' %}" style="display: none; position:absolute; right:512px; top:256px; z-index:100;" />
 		</div>
 	</div>
-
-
-	
-
-    </div>
 </body>
 </html>

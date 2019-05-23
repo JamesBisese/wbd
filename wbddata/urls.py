@@ -1,4 +1,4 @@
-"""wbd URL Configuration
+"""wbdtree URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.1/topics/http/urls/
@@ -18,13 +18,25 @@ from django.urls import path, re_path
 from django.conf.urls import url, include
 
 from rest_framework import routers
+from rest_framework.documentation import include_docs_urls
 
 
-from .views import HUCRegionViewSet, HUCSubregionViewSet, HUCAccountingUnitViewSet, HUCCatalogingUnitViewSet, HUCSubwatershedViewSet
-from .views import HUCSubwatershedList # WBDViewSet,
+from .views import HUCRegionViewSet, HUCSubregionViewSet, \
+    HUCAccountingUnitViewSet, HUCCatalogingUnitViewSet, HUCSubwatershedViewSet, \
+    csv_view, csv_view2, WBDAtttributeViewSet
 
+# from .views import HUCSubwatershedList # WBDViewSet,
+
+"""
+    this tag makes all the urls reverse into 'wbddata:{name}'
+"""
+app_name = 'wbddata'
 
 urlpatterns = [
+
+    path(r'hum/', csv_view),
+    path(r'hum2/', csv_view2),
+    re_path(r'hum/(?P<huc_code>\d{2})/', HUCRegionViewSet.as_view({'get': 'csv'}), name='region-csv'),
 
     path(r'hu2/',  HUCRegionViewSet.as_view({'get': 'list'}),           name='region-ulist'),
     path(r'hu4/',  HUCSubregionViewSet.as_view({'get': 'list'}),        name='subregion-ulist'),
@@ -32,22 +44,36 @@ urlpatterns = [
     path(r'hu8/',  HUCCatalogingUnitViewSet.as_view({'get': 'list'}),   name='catalogingunit-ulist'),
     path(r'hu12/', HUCSubwatershedViewSet.as_view({'get': 'list'}),     name='subwatershedvs-ulist'),
 
+    path(r'wbdattributes/', WBDAtttributeViewSet.as_view({'get', 'list'}), name='wbdattributes-ulist'),
+
     re_path(r'huc/(?P<huc_code>\d{2})/drilldown/', HUCRegionViewSet.as_view({'get': 'drilldown'}), name='region-drilldown'),
     re_path(r'huc/(?P<huc_code>\d{4})/drilldown/', HUCSubregionViewSet.as_view({'get': 'drilldown'}), name='subregion-drilldown'),
     re_path(r'huc/(?P<huc_code>\d{6})/drilldown/', HUCAccountingUnitViewSet.as_view({'get': 'drilldown'}), name='accountingunit-drilldown'),
     re_path(r'huc/(?P<huc_code>\d{8})/drilldown/', HUCCatalogingUnitViewSet.as_view({'get': 'drilldown'}), name='catalogingunit-drilldown'),
 
+    re_path(r'huc/(?P<huc_code>\d{12})/upstream/', HUCSubwatershedViewSet.as_view({'get': 'upstream'}), name='subwatershed-upstream'),
+    re_path(r'huc/(?P<huc_code>\d{12})/downstream/', HUCSubwatershedViewSet.as_view({'get': 'downstream'}), name='subwatershed-downstream'),
+
     path(r'huc/',  HUCRegionViewSet.as_view({'get': 'list'}), name='region-list'),
-    re_path(r'huc/(?P<huc_code>\d{2})/',  HUCRegionViewSet.as_view({'get': 'list'}), name='region-list'),
-    re_path(r'huc/(?P<huc_code>\d{4})/', HUCSubregionViewSet.as_view({'get': 'list'}), name='subregion-list'),
-    re_path(r'huc/(?P<huc_code>\d{6})/', HUCAccountingUnitViewSet.as_view({'get': 'list'}), name='accountingunit-list'),
-    re_path(r'huc/(?P<huc_code>\d{8})/', HUCCatalogingUnitViewSet.as_view({'get': 'list'}), name='catalogingunit-list'),
-    re_path(r'huc/(?P<huc_code>\d{12})/',  HUCSubwatershedViewSet.as_view({'get': 'list'}), name='subwatershed-detail'),
+    re_path(r'huc/(?P<huc_code>\d{2})/',  HUCRegionViewSet.as_view({'get': 'retrieve'}), name='region-list'),
+    re_path(r'huc/(?P<huc_code>\d{4})/', HUCSubregionViewSet.as_view({'get': 'retrieve'}), name='subregion-list'),
+    re_path(r'huc/(?P<huc_code>\d{6})/', HUCAccountingUnitViewSet.as_view({'get': 'retrieve'}), name='accountingunit-list'),
+    re_path(r'huc/(?P<huc_code>\d{8})/', HUCCatalogingUnitViewSet.as_view({'get': 'retrieve'}), name='catalogingunit-list'),
+
+    re_path(r'huc/(?P<huc_code>\d{12})/',  HUCSubwatershedViewSet.as_view({'get': 'retrieve'}), name='subwatershed-udetail'),
+
+
 
     # alternate methodology
-    path(r'hu12List/', HUCSubwatershedList.as_view(), name='subwatershed-ulist'),
+    # path(r'hu12List/', HUCSubwatershedList.as_view(), name='subwatershed-ulist'),
 
     path(r'api-auth/', include('rest_framework.urls', namespace='wbd_rest_framework')),
+    path(r'docs/', include_docs_urls(title='WBD Navigator API',
+                                     description="API to explore Hydrologic Unit Codes",
+                                     # patterns=['huc/', 'hu12'],
+                                     )),
+
+    # path(r'',  HUCRegionViewSet.as_view({'get': 'list'}),           name='index' )
 ]
 
 

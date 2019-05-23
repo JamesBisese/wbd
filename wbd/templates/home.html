@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+
+{% block title %}{{ block.super }}Home{% endblock %}
+
+
+
+<!-- Benefits of the Django application -->
+{% block content %}
+<div class="container" style="padding-top: 10px;">
+<div id="sec1" class="text-page" >
+
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Welcome to the Tetra Tech Watershed Boundary Dataset Tool</h2>
+          <div style="display: flex";>
+              <div style="display: flex";>
+                The API
+                  <ul>
+                      <li><a href="{% url 'wbddata:region-ulist' %}">Region List {% url 'wbddata:region-ulist' %}</a></li>
+                      <li><a href="{% url 'wbddata:subregion-ulist' %}">Subregion List {% url 'wbddata:subregion-ulist' %}</a></li>
+                      <li><a href="{% url 'wbddata:accountingunit-ulist' %}">AccountingUnit List {% url 'wbddata:accountingunit-ulist' %}</a></li>
+                      <li><a href="{% url 'wbddata:catalogingunit-ulist' %}">CatalogingUnit List {% url 'wbddata:catalogingunit-ulist' %}</a></li>
+                      <li><a href="{% url 'wbddata:subwatershedvs-ulist' %}">Subwatershed List {% url 'wbddata:subwatershedvs-ulist' %}</a></li>
+                  </ul>
+                  The Map
+                   <ul>
+                      <li><a href="{% url 'wbdmap:index' %}">WBD Map {% url 'wbdmap:index' %}</a></li>
+                       <li><img style="width: 200px; "    src="{%  static 'images/wbdmap.JPG' %}"></li>
+                   </ul>
+              </div>
+
+              <div style="display: flex">
+
+                   <ul>
+                       <li>Direct file downloads (these can be VERY BIG!)</li>
+                      <li><a href="{% static 'data/huc_hydrologic_unit_codes.csv' %}">HUC 2-8 information {% static 'data/huc_hydrologic_unit_codes.csv' %}</a> 130 kb</li>
+                   <li><a href="{% static 'data/huc12_attributes.csv' %}">WBD (HU12) information {% static 'data/huc12_attributes.csv' %}</a> 10.9 MB</li>
+                       <li><a href="{% static 'data/huc12_route.csv' %}">WBD (HU12) route {% static 'data/huc12_route.csv' %}</a> 6 MB</li>
+                       <li><a href="{% static 'data/metrics2016.csv' %}">Metrics 2016 {% static 'data/metrics2016.csv' %}</a> 76MB</li>
+                       <li><a href="{% static 'data/metrics2017.csv' %}">Metrics 2017 {% static 'data/metrics2017.csv' %}</a> 29.7MB</li>
+                       <li><a href="{% static 'data/geography.csv' %}">Geography {% static 'data/geography.csv' %}</a> 7MB</li>
+                   </ul>
+                  </div>
+            </div>
+          </div>
+
+        </div>
+              </div>
+              <div style="display: flex";><img src="{%  static 'images/hu_nesting.JPG' %}"/></div>
+          </div>
+
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock content %}
+
+{% block scripts %}
+
+{% endblock scripts %}
