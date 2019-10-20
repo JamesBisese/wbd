@@ -35,7 +35,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '!!!USE-VALUE-FROM-LOCAL-SETTINGS!!!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['!!!USE-VALUE-FROM-LOCAL-SETTINGS!!!',]
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_datatables',
     'wbdmap',
     'wbdchart',
     'wbddata',
@@ -88,6 +89,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.static',
                 'django.template.context_processors.csrf',
+
+                'wbd.context_processors.default',
             ],
         },
     },
@@ -190,53 +193,6 @@ LOGGING = {
         },
     },
 }
-# logging.config.dictConfig({
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'default': {
-#             # exact format is not important, this is the minimum information
-#             'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-#         },
-#         'django.server': DEFAULT_LOGGING['formatters']['django.server'],
-#     },
-#     'handlers': {
-#         # console logs to stderr
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'default',
-#         },
-#         # Add Handler for Sentry for `warning` and above
-#         # 'sentry': {
-#         #     'level': 'WARNING',
-#         #     'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-#         # },
-#         'django.server': DEFAULT_LOGGING['handlers']['django.server'],
-#     },
-#     'loggers': {
-#         # default for all undefined Python modules
-#         '': {
-#             'level': 'WARNING',
-#             'handlers': ['console'], # , 'sentry'],
-#         },
-#         # Our application code
-#         'wbddata.models': {
-#             'level': DEBUG,
-#             'handlers': ['console'], # , 'sentry'],
-#             # Avoid double logging because of root logger
-#             'propagate': False,
-#         },
-#         # Prevent noisy modules from logging to Sentry
-#         'noisy_module': {
-#             'level': 'ERROR',
-#             'handlers': ['console'],
-#             'propagate': False,
-#         },
-#         # Default runserver request logging
-#         'django.server': DEFAULT_LOGGING['loggers']['django.server'],
-#     },
-# })
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -269,6 +225,10 @@ HUC_FILE = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'huc_hydrologic_
 
 WBD_ATTRIBUTES_LOOKUPLIST = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'wbd_attributes_lookuplist.csv')
 
+WBD_ATTRIBUTES = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'wbd_attributes.csv')
+
+WBD_GEOGRAPHY = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'geography.csv')
+
 #TODO: figure a better way to be flexible here without needing this
 WBD_METRICS_2016 = os.path.join(BASE_DIR, 'wbddata', 'static', 'data',  'metrics2016.csv')
 
@@ -280,24 +240,31 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_datatables.renderers.DatatablesRenderer',
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework_csv.renderers.CSVRenderer', #2019-05-05
         'rest_framework.renderers.StaticHTMLRenderer',
         'rest_framework.renderers.TemplateHTMLRenderer',
         'rest_framework_xml.renderers.XMLRenderer',
+
     ),
-    'DEFAULT_PAGINATION_CLASS': 'wbddata.pagination.WBDCustomPagination',
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_datatables.filters.DatatablesFilterBackend',
+    ),
+    # 'DEFAULT_PAGINATION_CLASS': 'wbddata.pagination.WBDCustomPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables.pagination.DatatablesPageNumberPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 11,
+    'PAGE_SIZE': 10,
 
 }
 
 
-
+# http://127.0.0.1:82/api/wbdattributes/
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',

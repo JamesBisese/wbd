@@ -17,15 +17,24 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import LoginView
+from rest_framework import routers
 
 from . import views
+
+from wbddata.views import WBDAtttributeViewSet
 
 """
     this tag makes all the urls reverse into 'wbd:{name}'
 """
 app_name = 'wbd'
 
+router = routers.DefaultRouter()
+router.register(r'wbdattributes', WBDAtttributeViewSet)
+
 urlpatterns = [
+
+    path(settings.IIS_APP_ALIAS + 'api/', include(router.urls)),
+
     path(settings.IIS_APP_ALIAS + 'admin/', admin.site.urls),
     path(settings.IIS_APP_ALIAS + r'accounts/login/',
         LoginView.as_view(

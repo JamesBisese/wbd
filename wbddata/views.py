@@ -6,6 +6,11 @@ from django.conf import settings
 from django.db.models import IntegerField, BigIntegerField
 from django.db.models.functions import Cast
 from django.http import Http404, HttpResponse
+from django.shortcuts import HttpResponseRedirect, render, get_object_or_404
+from django_tables2 import SingleTableView
+from django_tables2.export.views import ExportMixin
+from django.urls import reverse,reverse_lazy
+from django.views import generic
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -22,6 +27,7 @@ import rest_framework_csv.renderers
 from .models import HUC, WBD, WBDAttributes
 from .serializers import HUCSerializer, WBDSerializer, WBDAttributeSerializer
 from .pagination import WBDCustomPagination
+from .tables import WBDAttributeTable
 
 # from .attributes import Attribute
 '''
@@ -43,6 +49,18 @@ from .pagination import WBDCustomPagination
         https://stackoverflow.com/questions/35625251/how-do-you-use-pagination-in-a-django-rest-framework-viewset-subclass/46173281#46173281
 
 '''
+class APIJSONDownstreamMetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/api_json_downstream.html"
+class APIJSONUpstreamMetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/api_json_upstream.html"
+class DownloadAttributesMetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/download_attributes.html"
+class DownloadMetrics2016MetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/download_metrics2016.html"
+class DownloadMetrics2017MetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/download_metrics2017.html"
+class DownloadGeographyMetaDataPage(generic.TemplateView):
+    template_name = "wbddata/metadata/download_geography.html"
 
 
 def huc_type(argument):
@@ -491,12 +509,6 @@ class HUCCatalogingUnitViewSet(HUCViewSet):
                 self.serializer_class = WBDSerializer
                 serializer = self.get_serializer(page, many=True, hudigit_nu=self.hudigit)
 
-                # # serializer_class = self.get_serializer_class()
-                # kwargs['context'] = self.get_serializer_context()
-                # si = serializer_class(*args, **kwargs)
-                #
-                # serializer = si(page, many=True)
-                # data = serializer.data
                 self.next_level = self.hudigit + 2
                 if self.next_level == 10:
                     self.next_level += 2
@@ -596,10 +608,75 @@ class HUCCatalogingUnitViewSet(HUCViewSet):
 '''
 TODO: not working.  error 'set' object has no attribute 'items'
 '''
-class WBDAtttributeViewSet(viewsets.ViewSet):
-    queryset = WBDAttributes.objects.all().order_by('row_nu')
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+class WBDAtttributeViewSet(viewsets.ModelViewSet):
+    """
+        HUCRegionViewSet
+    """
+    # queryset = HUC.objects.filter(huc_type__exact="Region").annotate(
+    #     huc_code_int=Cast('huc_code', IntegerField())
+    # ).order_by('huc_code_int', 'huc_code')
+    # huc_label = 'Region'
+    # hudigit = 2
+    # lookup_field = 'huc_code'
+    queryset = WBDAttributes.objects.all().order_by('sort_nu')
+    serializer_class = WBDAttributeSerializer
+    pagination_class = StandardResultsSetPagination
+
+    # def list(self, request):
+    #     # queryset = WBDAttributes.objects.all()
+    #     serializer = WBDAttributeSerializer(self.queryset, many=True)
+    #     return Response(serializer.data)
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = WBDAttributes.objects.all().order_by('sort_nu')
+        category_name = self.request.query_params.get('category_name', None)
+        if category_name is not None:
+            queryset = queryset.filter(category_name=category_name)
+        return queryset
+"""
+    available via /wbdattributes_list/
+"""
+class WBDAtttributeList(ExportMixin, SingleTableView): # TODO , FilterView
+    model = WBDAttributes
+    table_class = WBDAttributeTable
+    template_name = 'wbddata/wbdattribute_list.html'
+    # exclude_columns = ('edit_column','delete_column',)
+    # filterset_class = ScenarioFilter
+    #
+    def dispatch(self, request, *args, **kwargs):
+        # if not request.user.is_authenticated:
+        #     return HttpResponseRedirect(reverse_lazy('accounts:login'))
+        return super(WBDAtttributeList, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = super(WBDAtttributeList, self).get_queryset()
+
+        # if not (self.request.user.is_superuser or self.request.user.is_staff):
+        #     qs = qs.filter(user=self.request.user)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context_data = super(WBDAtttributeList, self).get_context_data(**kwargs)
+
+        context_data['title'] = 'WBD Atttribute List'
+        context_data['header_2'] = 'WBD Atttribute List'
+        return context_data
+
+class WBDAtttributeViewSet2(viewsets.ViewSet):
+
+    pagination_class = WBDCustomPagination
 
     serializer_class = WBDAttributeSerializer
+
+    queryset = WBDAttributes.objects.all().order_by('row_nu')
 
     def get_paginated_data(self, data):
         """
@@ -608,8 +685,8 @@ class WBDAtttributeViewSet(viewsets.ViewSet):
         assert self.paginator is not None
         return self.paginator.get_paginated_data(data)
 
-    def items(self, request, *args, **kwargs):
-        return None
+    # def items(self, request, *args, **kwargs):
+    #     return None
 
    # this list hu12 HUC12s
     def list(self, request, *args, **kwargs):
@@ -622,12 +699,12 @@ class WBDAtttributeViewSet(viewsets.ViewSet):
 
         if request.method == 'GET':
 
-
             serializer_context = {
                 'request': request,
             }
 
             data = None
+
             page = request.GET.get('page')
 
             try:
@@ -637,7 +714,7 @@ class WBDAtttributeViewSet(viewsets.ViewSet):
                 data = page
                 return Response({
                     "status": status.HTTP_404_NOT_FOUND,
-                    "message": 'No more record.',
+                    "message": 'No more record.' + str(e),
                     "data" : data
                     })
 
@@ -837,6 +914,8 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         # ibid hu12_data
         if 'hu12_data' in request.query_params:
             nav_kwargs['hu12_data'] = request.query_params['hu12_data'] in ['true', 'True', 'TRUE', '1', 't', 'y', 'yes']
+        if 'attribute_only' in request.query_params:
+            nav_kwargs['attribute_only'] = request.query_params['attribute_only'] in ['true', 'True', 'TRUE', '1', 't', 'y', 'yes']
 
         if 'hu12_data_format' in request.query_params:
             format = 'list'
@@ -852,7 +931,7 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         """
             ignore if it is not one of these 'sets'
         """
-        available_metric_sets = ['metrics2016', 'metrics2017','geography', ]
+        available_metric_sets = ['metrics2016', 'metrics2017','geography', 'wbd_navigation',]
 
         if 'download_attributes' in request.query_params:
             if request.query_params['download_attributes'] in available_metric_sets:
@@ -884,6 +963,17 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
 
             nav_kwargs['attributes'] = request.query_params['attributes']
 
+        if 'attribute_field_nm' in request.query_params:
+
+            wbdatts = WBDAttributes()
+            attribute_dict = wbdatts.clean_attributes(request.query_params['attribute_field_nm'])
+            for attribute_name in attribute_dict['sanitized']['valid_attributes']:
+                att = attribute_dict['sanitized']['valid_attributes'][attribute_name]
+                serializer = WBDAttributeSerializer(att)
+                attribute_dict['sanitized']['valid_attributes'][attribute_name] = serializer.data
+
+            nav_kwargs['attribute_field_nm'] = request.query_params['attribute_field_nm']
+
         # INTERIM since this is how it used to work
         # attribute_dict = {}
         # if 'attribute' in request.query_params:
@@ -895,23 +985,44 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         absolute_uri = request.build_absolute_uri().split('?')[0]
         navigation_data = {'direction': 'upstream',
                            'download': { 'download': {
-                                                 'title': "Download WBD Navigation Attributes",
-                                                  'url': request.build_absolute_uri() + '?hu12_data_format=csv'
+                                                 'title': "WBD Navigation Attributes",
+                                                 'url': absolute_uri + '?download_attributes=wbd_navigation'
+                                                  # 'url': request.build_absolute_uri() + '?hu12_data_format=csv'
                                              },
                                            'metrics2016': {
-                                               'title': "Download U.S. EPA WBD Metrics 2016",
+                                               'title': "U.S. EPA WBD Metrics 2016",
                                                'url': absolute_uri + '?download_attributes=metrics2016'
                                            },
                                            'metrics2017': {
-                                               'title': "Download U.S. EPA WBD Metrics 2017",
+                                               'title': "U.S. EPA WBD Metrics 2017",
                                                'url': absolute_uri + '?download_attributes=metrics2017'
                                            },
                                            'geography': {
-                                               'title': "Download U.S. EPA WBD Geography Attributes",
+                                               'title': "U.S. EPA WBD Geography Attributes",
                                                'url': absolute_uri + '?download_attributes=geography'
+                                           },
+                                           'permalink': {
+                                               'title': "Permalink to Navigation Results",
+                                               'url': request.build_absolute_uri(reverse('wbdmap:index', current_app='wbddata')) \
+                                                      + '?direction=upstream&hu=' + self.huc_code
                                            },
                                         },
                            'results': wbd.navigate_upstream(**nav_kwargs) }
+
+        if 'attribute_only' in nav_kwargs:
+
+            aggregated_attribute = {}
+            if 'aggregated_attribute' in navigation_data['results']:
+                aggregated_attribute = navigation_data['results']['aggregated_attribute']
+
+            return Response({
+            "status": status.HTTP_200_OK,
+            "time_elapsed": "{0} seconds".format((datetime.datetime.now() - startTime).total_seconds()),
+            "navigation_type": 'upstream',
+            "title": "attributes only for '{}'".format(self.huc_code),
+            "attributes": attribute_dict,
+            "attribute_data": {'aggregated_attribute': aggregated_attribute },
+            })
 
         parent_data['headwater_bool'] = navigation_data['results'].pop('headwater_bool', None)
         parent_data['terminal_bool'] = navigation_data['results'].pop('terminal_bool', None)
@@ -933,8 +1044,9 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         # use the already sanitized thing
         if 'download_attributes' in nav_kwargs \
                 and nav_kwargs['download_attributes'] in ['metrics2016',
-                                                                 'metrics2017',
-                                                                 'geography',]:
+                                                          'metrics2017',
+                                                          'geography',
+                                                          'wbd_navigation',]:
             metric_source = nav_kwargs['download_attributes']
             return self.metrics_response_as_csv(wbd.huc_code,
                                                 navigation_data['results']['hu12_data'],
@@ -1053,9 +1165,31 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         if 'hu12_data_fields' in request.query_params:
             nav_kwargs['hu12_data_fields'] = request.query_params['hu12_data_fields']
 
-        download_url = request.build_absolute_uri() + '&hu12_data_format=csv'
+        #download_url = request.build_absolute_uri() + '&hu12_data_format=csv'
+        absolute_uri = request.build_absolute_uri().split('?')[0]
         navigation_data = {'direction': 'downstream',
-                           'download_url': download_url,
+                           'download': { 'download': {
+                                                 'title': "WBD Navigation Attributes",
+                                                 'url': absolute_uri + '?download_attributes=wbd_navigation'
+                                                  # 'url': request.build_absolute_uri() + '?hu12_data_format=csv'
+                                             },
+                                           'metrics2016': {
+                                               'title': "U.S. EPA WBD Metrics 2016",
+                                               'url': absolute_uri + '?download_attributes=metrics2016'
+                                           },
+                                           'metrics2017': {
+                                               'title': "U.S. EPA WBD Metrics 2017",
+                                               'url': absolute_uri + '?download_attributes=metrics2017'
+                                           },
+                                           'geography': {
+                                               'title': "U.S. EPA WBD Geography Attributes",
+                                               'url': absolute_uri + '?download_attributes=geography'
+                                           },
+                                           'permalink': {
+                                               'title': "Permalink to Navigation Results",
+                                               'url': 'http://' + request.get_host() + '/map/' + '?direction=downstream&hu=' + self.huc_code
+                                           },
+                                        },
                            'results': wbd.navigate_downstream(**nav_kwargs)}
 
         #TODO debug internal drainage issue for 160203081300 and great salt lake
@@ -1066,6 +1200,7 @@ class HUCSubwatershedViewSet(viewsets.ReadOnlyModelViewSet):
         # there is no 'navigation_data' TBD: should it be called navigation_results, or just results? (if results, need to rename results.results)
         if parent_data['terminal_bool'] == True:
             navigation_data = None
+
 
         return Response({
             "status": status.HTTP_200_OK,

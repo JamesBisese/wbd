@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
-
+#jimmy was here
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wbd.development_settings')
     try:

@@ -20,7 +20,7 @@ from wbddata.models import HuNavigator, WBD
 #  Loaded 80743 rows in 325.216202 seconds
 #
 
-# (venv) C:\inetpub\wwwdjango\wbd>python manage.py load_huc12_route
+# (venv) C:\inetpub\wwwdjango\wbd>python manage.py load_HuNavigator
 #  Loaded 80743 rows in 1906.966155 seconds
 
 

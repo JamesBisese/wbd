@@ -11,7 +11,7 @@ import pickle
 import msgpack
 import decimal
 from django.core.cache import cache, caches
-
+from django.utils.encoding import smart_str
 import re
 
 import logging
@@ -87,6 +87,55 @@ class Attribute():
 
     def exists(self, attribute_name):
         return True
+
+    """
+        given a navigation tree, and a recognized 'metric_set' (right now a file of metrics)
+        return all the metrics data for each navigation node (hu12)
+
+        INTERIM: not optimized, and I barely understand what is going on
+
+    """
+
+    def navigation_metrics(self, navigation_tree, attribute_obj):
+        metric_set = attribute_obj.source_tx
+        metrics_file = ''
+        # if metric_set == 'Service2016':
+        #     metrics_file = settings.WBD_METRICS_2016
+        # elif metric_set == 'Service2017':
+        #     metrics_file = settings.WBD_METRICS_2017
+        # else:
+        # create the ...
+        metric_set = os.path.join(attribute_obj.source_tx, attribute_obj.category_name.replace(':', '-'))
+
+        metrics_file = os.path.join(settings.BASE_DIR, 'wbddata', 'static', 'data', metric_set + '.csv')
+
+        '''
+        this auto-magically creates and loads 'self.attribute_data'
+
+        TODO: optimize this to just read the fields we want!!!! a single field
+        '''
+        self.attribute_file = metrics_file
+
+        '''
+            we don't need the data as a dictionary, just a list
+        '''
+        a = self.attribute_file_get_columns(metrics_file)
+
+        # TODO: this is where you could filter out columns 'not to include'
+        fields = {a[i]: i for i in range(0, len(a), 1)}
+
+        field_nm = attribute_obj.field_nm
+        field_index = fields[attribute_obj.field_nm]
+
+        # set value for clicked/selected HU
+        setattr(navigation_tree, field_nm, self.attribute_data[navigation_tree.name][field_index])
+
+        for node in navigation_tree.descendants:
+            setattr(node, field_nm, self.attribute_data[node.name][field_index])
+
+        return
+
+
 
     """
         given a navigation tree, and a recognized 'metric_set' (right now a file of metrics)
@@ -228,8 +277,13 @@ class Attribute():
             """
             force_refresh_cache = False
 
+            def _smart_key(key):
+                return smart_str(''.join([c for c in key if ord(c) > 32 and ord(c) != 127]))
+
+            cache_key = _smart_key(os.path.basename(attribute_file))
+
             if not force_refresh_cache == True:
-                self.attribute_data = cache_atts.get(os.path.basename(attribute_file))
+                self.attribute_data = cache_atts.get(cache_key)
                 if self.attribute_data is not None:
                     logger.debug("read from cache_atts in %s seconds" % (datetime.datetime.now() - startTime).total_seconds())
 
@@ -251,7 +305,7 @@ class Attribute():
                                                                        startTime).total_seconds())
                 sys.setrecursionlimit(10000)
 
-                cache_atts.set(os.path.basename(attribute_file), self.attribute_data)
+                cache_atts.set(cache_key, self.attribute_data)
 
                 logger.debug("done storing in cache_atts at %s seconds" % (datetime.datetime.now() -
                                                                        startTime).total_seconds())

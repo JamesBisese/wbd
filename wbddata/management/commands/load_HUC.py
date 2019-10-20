@@ -7,7 +7,7 @@ import csv
 from adaptor.model import CsvDbModel
 
 """
-(venv) C:\inetpub\wwwdjango\wbd>python manage.py load_huc_hydrologic_unit_codes
+(venv) C:\inetpub\wwwdjango\wbd>python manage.py load_HUC
  Loaded 2908 rows in 47.644426 seconds
 
 """

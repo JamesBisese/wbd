@@ -102,7 +102,7 @@ class EmbeddedResources(serializers.Field):
                                request=self.context['request']),
             }
             ret["upstream"] = {
-                "title": "8. Navigate upstream from '{}'".format(self.huc_code),
+                "title": "API JSON Upstream from '{}'".format(self.huc_code),
                 "url": reverse('wbddata:' + huc_type(12).lower() + '-upstream',
                                kwargs={ 'huc_code': self.huc_code },
                                request=self.context['request']),
@@ -112,7 +112,7 @@ class EmbeddedResources(serializers.Field):
             else:
                 terminal_huc12_ds = self.parent.instance[0].terminal_huc12_ds
             ret["downstream"] = {
-                "title": "9. Navigate downstream from '{}' to '{}'".format(self.huc_code, terminal_huc12_ds),
+                "title": "API JSON Downstream from '{}'".format(self.huc_code),
                 "url": reverse('wbddata:' + huc_type(12).lower() + '-downstream',
                                kwargs={ 'huc_code': self.huc_code },
                                request=self.context['request']),
@@ -215,32 +215,28 @@ class WBDSerializer(serializers.ModelSerializer):
         super(WBDSerializer, self).__init__(*args, **kwargs)
 
 '''
-    serializer for WBD (hu12) hydrologic units
+
+    serializer for WBD Attributes (Metadata)
+
 '''
 class WBDAttributeSerializer(serializers.ModelSerializer):
 
-    '''
-        embed the resources (urls for other navigation items)
-    '''
-    # resources = EmbeddedResources(source='huc_code')
-    #
-    # terminal_hu12_ds = EmbeddedTerminalOutlet(source='*')
-    #
-    # hu12_ds = EmbeddedHU12Downstream(source='*')
-
     class Meta:
         model = WBDAttributes
-        fields = (
-                "row_nu",
-                "attribute_name",
-                "source",
-                "alias",
-                "description",
-                "field_type",
-                "is_served",
-                "comments",
-        )
-        read_only_fields = [f.name for f in WBD._meta.get_fields()]
+        fields = [
+                    'sort_nu',
+                    'source_tx',
+                    'category_name',
+                    'field_nm',
+                    'label_tx',
+                    'rest_layer_name',
+                    'units_tx',
+
+                    'statistic_cd',
+
+                    'description_tx',
+                ]
+        read_only_fields = [f.name for f in WBDAttributes._meta.get_fields()]
 
     def __init__(self, *args, **kwargs):
 

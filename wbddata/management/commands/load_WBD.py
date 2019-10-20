@@ -7,6 +7,11 @@ from datetime import datetime as dt
 import csv
 from django.db import transaction
 
+"""
+
+    Load the WBD Attributes - 1 row of attributes per-HUC12 into WBD table
+
+"""
 # this is slow, but it uses django to load, rather than doing it outside of the ORM
 # (venv) C:\inetpub\wwwdjango\wbdtree>python manage.py load_huc12_attributes
 #
@@ -23,7 +28,7 @@ from django.db import transaction
 # (venv) C:\inetpub\wwwdjango\wbdtree>python manage.py load_huc12_attributes
 #  Loaded 83018 rows in 249.326001 seconds
 
-# C:\inetpub\wwwdjango\wbd\venv\Scripts\python.exe C:/inetpub/wwwdjango/wbdtree/manage.py load_huc12_attributes --traceback
+# C:\inetpub\wwwdjango\wbd\venv\Scripts\python.exe C:/inetpub/wwwdjango/wbdtree/manage.py load_WBD
 #  Loaded 83018 rows in 259.411402 seconds
 
 # TODO: change to use DictReader a la load_wbd_attribute_lookuplist

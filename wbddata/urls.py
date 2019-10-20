@@ -23,7 +23,12 @@ from rest_framework.documentation import include_docs_urls
 
 from .views import HUCRegionViewSet, HUCSubregionViewSet, \
     HUCAccountingUnitViewSet, HUCCatalogingUnitViewSet, HUCSubwatershedViewSet, \
-    csv_view, csv_view2, WBDAtttributeViewSet
+    csv_view, csv_view2, WBDAtttributeViewSet, WBDAtttributeList, \
+    APIJSONDownstreamMetaDataPage,     APIJSONUpstreamMetaDataPage,\
+    DownloadAttributesMetaDataPage,\
+    DownloadMetrics2016MetaDataPage,\
+    DownloadMetrics2017MetaDataPage,\
+    DownloadGeographyMetaDataPage
 
 # from .views import HUCSubwatershedList # WBDViewSet,
 
@@ -44,7 +49,8 @@ urlpatterns = [
     path(r'hu8/',  HUCCatalogingUnitViewSet.as_view({'get': 'list'}),   name='catalogingunit-ulist'),
     path(r'hu12/', HUCSubwatershedViewSet.as_view({'get': 'list'}),     name='subwatershedvs-ulist'),
 
-    path(r'wbdattributes/', WBDAtttributeViewSet.as_view({'get', 'list'}), name='wbdattributes-ulist'),
+    path(r'wbdattributes/', WBDAtttributeViewSet.as_view({'get': 'list'}), name='wbdattributes-ulist'),
+    path(r'wbdattributes_list/', WBDAtttributeList.as_view(), name='wbdattributes_list'),
 
     re_path(r'huc/(?P<huc_code>\d{2})/drilldown/', HUCRegionViewSet.as_view({'get': 'drilldown'}), name='region-drilldown'),
     re_path(r'huc/(?P<huc_code>\d{4})/drilldown/', HUCSubregionViewSet.as_view({'get': 'drilldown'}), name='subregion-drilldown'),
@@ -63,7 +69,6 @@ urlpatterns = [
     re_path(r'huc/(?P<huc_code>\d{12})/',  HUCSubwatershedViewSet.as_view({'get': 'retrieve'}), name='subwatershed-udetail'),
 
 
-
     # alternate methodology
     # path(r'hu12List/', HUCSubwatershedList.as_view(), name='subwatershed-ulist'),
 
@@ -73,7 +78,13 @@ urlpatterns = [
                                      # patterns=['huc/', 'hu12'],
                                      )),
 
-    # path(r'',  HUCRegionViewSet.as_view({'get': 'list'}),           name='index' )
+    path(r'metadata/api_downstream', APIJSONDownstreamMetaDataPage.as_view()),
+    path(r'metadata/api_upstream', APIJSONUpstreamMetaDataPage.as_view()),
+    path(r'metadata/download_attributes', DownloadAttributesMetaDataPage.as_view()),
+    path(r'metadata/download_metrics2016', DownloadMetrics2016MetaDataPage.as_view()),
+    path(r'metadata/download_metrics2017', DownloadMetrics2017MetaDataPage.as_view()),
+    path(r'metadata/download_geography', DownloadGeographyMetaDataPage.as_view())
+
 ]
 
 

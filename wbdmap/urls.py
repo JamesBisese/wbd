@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.urls import path, include
 
-from .views import Index, IndexMap, OldMap, ElevationSlopeMap
+from . import views # import Index, IndexMap
 
 """
     this tag makes all the urls reverse into 'wbdmap:{name}'
@@ -24,9 +24,5 @@ from .views import Index, IndexMap, OldMap, ElevationSlopeMap
 app_name = 'wbdmap'
 
 urlpatterns = [
-    # path('index/', IndexMap),
-    path(settings.IIS_APP_ALIAS , IndexMap, name='index'),
-    path(settings.IIS_APP_ALIAS + 'old/', OldMap, name='old'),
-    path(settings.IIS_APP_ALIAS + 'slope/', ElevationSlopeMap, name='elevationslope'),
-
+    path(settings.IIS_APP_ALIAS , views.IndexMap.as_view(), name='index'),
 ]

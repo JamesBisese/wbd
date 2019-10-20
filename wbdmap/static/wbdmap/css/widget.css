@@ -1,0 +1,200 @@
+html, body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+pre img {
+	width: 50px;
+	height: 50px;
+}
+
+h3 {
+	margin: 0 0 5px 0;
+	border-bottom: 1px solid #444;
+}
+
+#map {
+	margin: 0;
+	padding: 0;
+}
+
+.dojoxFloatingPaneCanvas {
+    width: 383px !important;
+}
+
+.dojoxGridScrollbox {
+    overflow-x: hidden;
+}
+
+.dijitTitlePane {
+    width: 383px;
+}
+
+.label {
+	display: inline-block;
+	width: 140px;
+}
+
+.grid {
+	width: 100%;
+	height: 200px;
+}
+.results {
+	/*width: 100%;*/
+	/*height: 200px;*/
+}
+.tundra .dijitTab .tabLabel {
+
+    font-size: smaller;
+    min-height: 20px;
+    margin-top: 5px;
+}
+
+#widgetOuter {
+	position: absolute;
+    width: 395px;
+    height: 500px;
+	/*height: 500px;*/
+	/*width: 440px;*/
+	left: 10px;
+	font-family: arial;
+	bottom: 5%;
+	margin: 5px;
+	padding: 5px;
+	z-index: 40;
+	background: #fff;
+	color: #444;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+
+	border-radius: 5px;
+}
+
+.dijitTitleNode {
+    width: 100%;
+    height: 28px;
+    margin-bottom: 2px;
+    color: white;
+    background: #1b365d;
+    padding: 3px;
+    padding-left: 6px;
+    /*border-top-left-radius: 4px;*/
+    /*border-top-right-radius: 4px;*/
+}
+.dojoxFloatingPaneTitle {
+    background: #cccccc;
+    background: #fafafa repeat-x bottom left;
+    border: 1px solid #bfbfbf;
+    /*padding: 4px 4px 2px 4px;*/
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0!important;
+}
+.dojoxFloatingPaneContent {
+    overflow: hidden;
+}
+#widgetInner {
+    /*width: 100%;*/
+    /*height: 100%;*/
+    margin-top: 3px;
+    border-style: none;
+    /*border-width: thin;*/
+    /*border-color: rgb(204, 204, 204);*/
+}
+
+#grids {
+	overflow-y: scroll;
+	/*height: 350px;*/
+	width: 350px;
+	border-bottom: 1px solid;
+    font-size: 11px;
+}
+
+#navActive{
+    display: inline-block;
+    float: left;
+    padding-right: 15px;
+    padding-left: 3px;
+}
+
+#navDirection {
+    font-size: 12px;
+}
+#titlePane {
+    width: 240px;
+}
+#results_download_pane  {
+    font-size: 11px;
+}
+
+#results_download_pane .btn {
+    padding: 2px;
+    font-size: 12px;
+}
+
+#NavigationMessages {
+    padding: 5px;
+}
+
+#gridAttributeResults .dojoxGridCell {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+#gridNavResults .dojoxGridCell {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+/*.claro .dijitTitlePaneTitle {*/
+/*    background: #fff;*/
+/*    font-weight: 600;*/
+/*    border: none;*/
+/*    border-bottom: solid 1px #29201A;*/
+/*    border-top: solid 1px #29201A;*/
+/*}*/
+
+/*.claro .dijitTitlePaneTitleHover {*/
+/*    background: #eee;*/
+/*}*/
+
+/*.claro .dijitTitlePaneTitleActive {*/
+/*    background: #808775;*/
+/*}*/
+
+/*.claro .dijitTitlePaneContentOuter {*/
+/*    border-right: none;*/
+/*    border-bottom: none;*/
+/*    border-left: none;*/
+/*}*/
+
+/*.dojoxFloatingPaneTitle {*/
+/*    color: white;*/
+/*    background-color: #1b365d;*/
+/*    font-family: Arial, Helvetica, sans-serif;*/
+/*    font-size: 12pt;*/
+/*    font-weight: bold;*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*.dojoxFloatingPaneTitle, .reportTitlePane {*/
+/*    color: white;*/
+/*    background-color: #76a2c5;*/
+/*    font-family: Arial, Helvetica, sans-serif;*/
+/*    font-size: 12pt;*/
+/*    font-weight: bold;*/
+/*    overflow: hidden;*/
+/*}*/
+#recomputeAggregate {
+    padding: 2px 2px;
+    display: inline-block;
+    float: right;
+    margin-top: -10px;
+    margin-bottom: 8px;
+    margin-right: 15px;
+}
+
+.dijitContentPane {
+  overflow: hidden !important;
+}

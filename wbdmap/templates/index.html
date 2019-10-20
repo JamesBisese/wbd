@@ -3,141 +3,29 @@
 <!DOCTYPE html>
 <html>
 <script src="{% static 'wbdmap/js/nprogress.js' %}"></script>
-<link rel='stylesheet' href="{% static 'wbdmap/js/nprogress.css' %}"/>
+
 <head>
 <meta charset="utf-8">
 <meta name="viewport"
 	content="initial-scale=1, maximum-scale=1,user-scalable=no">
 <title>Tt HUC12 Navigator</title>
+
 <link rel="stylesheet" href="https://js.arcgis.com/3.28/dijit/themes/tundra/tundra.css">
 <link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+
 <link rel="stylesheet" href="{% static 'wbdmap/css/bootstrap.css' %}" type="text/css"/>
 <link rel="stylesheet" href="{% static 'wbdmap/css/app.css' %}" type="text/css"/>
+<link rel='stylesheet' href="{% static 'wbdmap/css/nprogress.css' %}"/>
 
+<link rel='stylesheet' href="{% static 'wbdmap/css/widget.css' %}"/>
 
-
-
-<style>
-html, body {
-	height: 100%;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-}
-
-#map {
-	margin: 0;
-	padding: 0;
-}
-#attribute_selector {
-	position: absolute; 
-	top: 65px; 
-	left: 60px; 
-	z-index:100;
-}
-
-.dojoxGridScrollbox { overflow-x: hidden; }
-
-
-#grids {
-	overflow-y: scroll;
-	height: 350px;
-	width: 100%;
-	border-bottom: 1px solid;
-}
-
-pre img {
-	width: 50px; 
-	height: 50px;
-}
-
-h3 {
-	margin: 0 0 5px 0;
-	border-bottom: 1px solid #444;
-}
-
-.label {
-	display: inline-block;
-	width: 140px;
-}
-
-.grid {
-	width: 100%;
-	height: 200px;
-}
-.results2 {
-	width: 100%;
-	height: 200px;
-}
-
-.esriSimpleSliderTL {
-	top: 60px;
-	left: 20px;
-}
-
-#controls {
-	position: absolute;
-	height: 500px;
-	width: 440px;
-	left: 10px;
-	font-family: arial;
-	bottom: 5%;
-	margin: 5px;
-	padding: 5px;
-	z-index: 40;
-	background: #fff;
-	color: #444;
-	-moz-box-shadow: 0 0 5px #888;
-	-webkit-box-shadow: 0 0 5px #888;
-	box-shadow: 0 0 5px #888;
-
-	border-radius: 5px;
-}
-
-#titlePane {
-    width: 240px;
-}
-
-.claro .dijitTitlePaneTitle {
-    background: #fff;
-    font-weight: 600;
-    border: none;
-    border-bottom: solid 1px #29201A;
-    border-top: solid 1px #29201A;
-}
-
-.claro .dijitTitlePaneTitleHover {
-    background: #eee;
-}
-
-.claro .dijitTitlePaneTitleActive {
-    background: #808775;
-}
-
-.claro .dijitTitlePaneContentOuter {
-    border-right: none;
-    border-bottom: none;
-    border-left: none;
-}
-
-.dojoxFloatingPaneTitle, .reportTitlePane {
-    color: white;
-    background-color: #76a2c5;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12pt;
-    font-weight: bold;
-    overflow: auto;
-}
-
-    .small {
-
-    }
-</style>
+<link rel="stylesheet" href="{% static 'wbdmap/css/FloatingPane.css' %}" type="text/css"/>
+<link rel="stylesheet" href="{% static 'wbdmap/css/ResizeHandle.css' %}" type="text/css"/>
 
 <script src="https://js.arcgis.com/3.28/"></script>
 
 <!-- debug is being used as a surrogate for Development vs. Production -->
-{% if debug %}
+{% if DEBUG %}
     <script type="text/javascript" language="Javascript" src="{% static 'wbdmap/js/urls.js' %}"></script>
 {% else %}
     <script type="text/javascript" language="Javascript" src="{% static 'wbdmap/js/urls_production.js' %}"></script>
@@ -155,79 +43,116 @@ h3 {
 			<a class="navbar-brand">Tetra Tech HUC12 Navigator</a>
 		</div>
 	</nav>
-	<div id='thin_blue_line' style="width: 100%; top:52px; height:15px;" ></div>
-	<div data-dojo-type="dijit.layout.BorderContainer"
-		data-dojo-props="design:'headline',gutters:false"
-		style="width: 100%; height: 100%; margin: 0;">
-		<div id="map" data-dojo-type="dijit.layout.ContentPane"
-			data-dojo-props="region:'center'">
-			<!-- leave this off for now - there is nothing in WBD model to handle it yet -->
-			<div id="attribute_selector" style="display: none;">
-				<select id="attribute">
-					<option value="NONE" selected="selected">-- Show Areas Only --</option>
-					<option value="SNFA_MEAN">Mean rate of synthetic N fertilizer application to agricultural lands in kg N/ha/yr</option>
-					<option value="ELEVMEAN">Mean Elevation (ft. above mean sea level)</option>
-					<option value="SLOPEMEAN">Mean Slope (ft/mile)</option>
-					<option value="STREAMDENSITY">The length of streams per 12-digit HUC in km, divided by the area in square km.</option>				  
-					<option value="N_INDEX">Percent area classified as natural land cover</option>				  
-					<option value="PAGT">Percent area classified as agriculture</option>				  
-					<option value="PFOR">Percent area classified as forest</option>				  
-					<option value="dwd_gal_per_day">Domestic Water Demand, gallons per day</option>
-				</select>
-			</div>
-			
-			<div id="controls" data-dojo-type="dojox/layout/FloatingPane"
-             data-dojo-props="resizable:false, dockable:true, closable:false, title:'EnviroAtlas HUC12 Navigator'" >
 
-				
-				<div id="user_options">
-                    <div style="display: inline-block; float:left; padding-right: 48px;">
-{#                        <label for="navigation_active">Active</label>#}
-{#                        <input id="navigation_active" type="checkbox" name="terms" checked />                        #}
-                        <input id="navigation_active" type="checkbox" name="terms" checked />Active
+	<div id='thin_blue_line' style="width: 100%; top:52px; height:15px;" ></div>
+
+	<div data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline',gutters:false"
+		style="width: 100%; height: 100%; margin: 0;">
+		<div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'">
+
+            <div id="widgetOuter" data-dojo-type="dojox/layout/FloatingPane"
+             data-dojo-props="resizable:false, dockable:false, closable:false, title:'EnviroAtlas HUC12 Navigator'">
+
+                <div id="widgetInner" data-dojo-type="dijit.layout.TabContainer">
+                    <div id="user_optionsAZZ" data-dojo-type="dijit.layout.ContentPane" title="Select Subwatershed">
+                        <div style="border-style: solid; border-width: thin; border-color: #ccc; padding: 3px;">
+                            <div id="navActive" title="Toggle to enable map-click of Subwatersheds">
+                                <input id="navigation_active" type="checkbox" checked />Active
+                            </div>
+                            <div id="navDirection" title="Select direction of Subwatersheds navigation">Navigation direction:
+                                <input type='radio' name='navigation_direction' ng-model='mValue' value='Upstream'  checked="checked" />Upstream/
+                                <input type='radio' name='navigation_direction' ng-model='mValue' value='Downstream' />Downstream
+                            </div>
+                        </div>
+                        <div id="NavigationMessages"></div>
+                        <div id="grids" >
+
+                            <div id="gridHUC12"></div>
+
+                            <p></p>
+                            <div id="gridNavResults"></div>
+                        </div>
+                        <div id="footer"></div>
                     </div>
-					<div id="navDirection" >Navigation direction:
-						<input type='radio' name='navigation_direction' ng-model='mValue' value='Upstream'  checked="checked" />Upstream/
-						<input type='radio' name='navigation_direction' ng-model='mValue' value='Downstream' />Downstream
-					</div>
-                    <div id="navigation_controls_advanced" data-dojo-type="dijit/TitlePane"
-                         data-dojo-props="title: 'Advanced Controls', open:false">
-                        <div style="display: inline-block;">
+                    <div id="navigation_controls_advancedAZZ" data-dojo-type="dijit.layout.ContentPane" title="Aggregate Indicators">
+                        <div style="display: none;">
                             <div style="display: inline-block;">
                                 <input id = "show_all_huc12" type="checkbox" name="terms" checked />Show all navigated HUC12s
                             </div>
+                        </div>
+{#                        <br style="display: none;">#}
+                        <div id="NavigateErrorMessage" style="display: none;"></div>
+                        <label style="display: none;">Subwatershed HUC12:
+                            <input type="text" id="navigation_huc_code" value="" maxlength="12"
+                                   onkeypress="return chkNumeric(event)" style="margin-left: 5px; font-size: 11px; font-weight: lighter;width: 100px;"/>
+                            <button type="submit" class="btn btn-primary" id="navigateViaText" style="padding: 2px;" disabled
+                                    >Navigate</button><br>
+                        </label>
+
+{#                        <br>#}
+                        <!-- onChange this selection filters and replaces the values in the drop down list below-->
+                        <label for="attribute_selector" style="margin-top: 5px; margin-bottom: 0px; font-weight: lighter;" >Select Indicator Category:</label>
+                        <div id="indicatorDiv" >
+
+                            <div id="category_selector" style="display: inline-block; font-size: 11px; overflow: hidden;">
+                                <select id="category">
+                                    <option value="NONE">--- Select ---</option>
+                                    <option value="Carbon Storage">Carbon Storage</option>
+                                    <option value="Crop Productivity">Crop Productivity</option>
+                                    <option value="Energy Potential">Energy Potential</option>
+                                    <option value="Engagement with Outdoors">Engagement with Outdoors</option>
+                                    <option value="Geography">Geography</option>
+                                    <option value="Impaired Waters">Impaired Waters</option>
+                                    <option value="Land Cover: Near-Water">Land Cover: Near-Water</option>
+                                    <option value="Land Cover: Type">Land Cover: Type</option>
+                                    <option value="Landscape Pattern">Landscape Pattern</option>
+                                    <option value="Near-Road Environments">Near-Road Environments</option>
+                                    <option value="Pollutant Reduction: Water">Pollutant Reduction: Water</option>
+                                    <option value="Pollutants: Nutrients">Pollutants: Nutrients</option>
+                                    <option value="Population Distribution">Population Distribution</option>
+                                    <option value="Protected Lands">Protected Lands</option>
+                                    <option value="Species: At-Risk and Priority">Species: At-Risk and Priority</option>
+                                    <option value="Species: Other">Species: Other</option>
+                                    <option value="Water Supply, Runoff, and Flow">Water Supply, Runoff, and Flow</option>
+                                    <option value="Water Use">Water Use</option>
+                                    <option value="Weather and Climate">Weather and Climate</option>
+                                    <option value="Wetlands and Lowlands">Wetlands and Lowlands</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="recomputeAggregate" disabled
+                                    >Recompute Aggregate</button><br>
+                        </div>
+                        <!-- this is the value used to make the query -->
+                        <label for="attribute_selector" style="margin-top: 5px; margin-bottom: 0px; font-weight: lighter;" >Select Specific Indicator to Aggregate:</label>
+                        <div id="attribute_selector" style="display: block; font-size: 11px; overflow: hidden;">
+                            <select id="attribute">
+                                <option value="NONE" selected="selected">-- Select Category First --</option>
+                            </select>
+                        </div>
+                        <p></p>
+                            <div id="gridAttributeResults"></div>
+                    </div>
+                    <div id="results_download_pane" data-dojo-type="dijit.layout.ContentPane" title="Download" >
+                        <div >
+                            <div id="download_metrics2016" style="display:none"></div>
+                            <div id="download_metrics2017" style="display:none"></div>
+                            <div id="download_geography" style="display:none"></div>
+                            <div id="download_attributes" style="display:none"></div>
+                            <div id="permalink" style="display:none"></div>
+                            <div id="api_upstream" style="display:none"></div>
+                            <div id="api_downstream" style="display:none"></div>
+
 
                         </div>
-                        <br>
-                        <label for="navigation_huc_code">HU8 or H12 HUC Code</label>
-                        <input type="text" id="navigation_huc_code" value="" />
                     </div>
-                    <div id="results_download" data-dojo-type="dijit/TitlePane"
-                         data-dojo-props="title: 'Download/API', open:false">
-                        <div id="api_downstream" style="display:none"></div>
-                        <div id="api_upstream" style="display:none"></div>
-                        <div id="download_attributes" style="display:none"></div>
-                        <div id="download_metrics2016" style="display:none"></div>
-                        <div id="download_metrics2017" style="display:none"></div>
-                        <div id="download_geography" style="display:none"></div>
-                    </div>
-				</div>
-				<div id="results"></div>
-				<div id="grids" >
-					<div id="gridHUC12"></div>
-					<p></p>
-					<div id="gridAttributeResults"></div>
-					<p></p>
-					<div id="gridNavResults"></div>
-				</div>
-				<div id="footer">
-					
-				</div>
 
-				
-			</div>
+
+               </div>
+            </div>
+        </div>
+
 		<img id="loadingImg" src="{% static 'wbdmap/images/hourglass.gif' %}" style="display: none; position:absolute; right:512px; top:256px; z-index:100;" />
-		</div>
 	</div>
+
 </body>
 </html>

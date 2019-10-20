@@ -2,9 +2,13 @@ import datetime
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.views import generic
 
-def IndexMap (request):
-    return render_to_response('index.html')
+# def IndexMap (request):
+#     return render_to_response('index.html')
+
+class IndexMap(generic.TemplateView):
+    template_name = "index.html"
 
 def OldMap (request):
     return render_to_response('indexOLD.html')

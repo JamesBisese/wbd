@@ -1,9 +1,17 @@
-//used in index_up_and_down.js
+/*
+* URI for 'wbd' application
+* this helps set the application URL whether it is running in PyCharm, or on IIS
+*
+ */
 
-var NAVIGATOR_URL = "http://127.0.0.1:86/huc";
+var NAVIGATOR_URL = "";
 
-// !!!PRODUCTION!!!
+/*
+* on production, running on IIS, this set the basename
+*
+*
+*/
 
-// var NAVIGATOR_URL = "/wbd/huc";
+// var NAVIGATOR_URL = "/wbd";
 
 

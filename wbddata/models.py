@@ -415,6 +415,49 @@ class WBD(models.Model):
         def get_water_area(node):
             return (node.water_area_sq_km or 0) + sum(get_water_area(child) for child in node.children)
 
+        def get_PFOR_sum(node, attribute_nm):
+            # print ("{} - {} -- {} --{}".format(node.name,
+            #                               node.PFOR if hasattr(node, attribute_nm) else "NA",
+            #                               getattr(node, attribute_nm) if hasattr(node, attribute_nm) else "NA2",
+            #                               getattr(node, attribute_nm) if (hasattr(node, attribute_nm) and getattr(node, attribute_nm).isnumeric()) else 1)
+            #        )
+            return (float(getattr(node, attribute_nm)) if hasattr(node, attribute_nm) and float(getattr(node, attribute_nm)) else 1) + sum(get_PFOR_sum(child, attribute_nm) for child in node.children)
+
+        """
+            this computes a direct sum of the attribute
+        """
+        def get_attribute_sum(node, attribute_nm):
+            return (float(getattr(node, attribute_nm)) if hasattr(node, attribute_nm) and float(getattr(node, attribute_nm)) else 0) + sum(get_attribute_sum(child, attribute_nm) for child in node.children)
+
+        """
+            this computes a direct sum of the attribute
+        """
+        def get_attribute_avg(node, attribute_nm):
+            return (node.area_sq_km/float(getattr(node, attribute_nm))
+                    if hasattr(node, attribute_nm) and float(getattr(node, attribute_nm)) and node.area_sq_km
+                    else 0) + sum(get_attribute_sum(child, attribute_nm) for child in node.children)
+
+        def average(a):
+            if len(a) == 1:
+                return a[0]
+            else:
+                n = len(a)
+                return (a[0] + (n - 1) * average(a[1:])) / n
+
+        def get_average(node, attribute_nm):
+            nvalues = []
+            for n in node.descendants:
+                value_tx = getattr(n, attribute_nm)
+                try:
+                    value_va = float(value_tx)
+                    nvalues.append(value_va)
+                except ValueError:
+                    logger.error("unable to cast '{}' as float".format(value_tx))
+
+
+
+
+            return average(nvalues)
 
         try:
             huc_navigation_tree = self.navigation_tree[self.huc_code]
@@ -451,12 +494,81 @@ class WBD(models.Model):
             RETURN!!!  at a headwater - navigating upstream. there are no results
         """
         if huc_navigation_tree.is_leaf:
+
+            attribute_obj = None
+            if 'attribute_field_nm' in kwargs:
+                attribute_obj = WBDAttributes.objects.filter(field_nm=kwargs['attribute_field_nm'])[0]
+                # this adds the attribute data to each node (slow though)
+
+                Attribute().navigation_metrics(huc_navigation_tree, attribute_obj)
+
+                field_nm = attribute_obj.field_nm
+                if attribute_obj.units_tx == '%' and attribute_obj.statistic_cd == 'sum':
+                    sum_va = getattr(huc_navigation_tree, field_nm)
+                    area_va = get_area(huc_navigation_tree) - huc_navigation_tree.area_sq_km
+                    sum_va = 100 * sum_va / area_va
+                elif attribute_obj.units_tx == '%' and attribute_obj.statistic_cd == 'average':
+                    sum_va = getattr(huc_navigation_tree, field_nm)
+                elif attribute_obj.units_tx == 'inches per year' and attribute_obj.statistic_cd == 'average':
+                    sum_va = getattr(huc_navigation_tree, field_nm)
+                elif attribute_obj.statistic_cd == 'average':
+                    sum_va = getattr(huc_navigation_tree, field_nm)
+                else:
+                    sum_va = get_attribute_sum(huc_navigation_tree, field_nm)
+
+                sum_va = round(float(sum_va), 2)
+
+                data['aggregated_attribute'] = {
+                    'attribute_field_nm': kwargs['attribute_field_nm'],
+                    # 'attribute_meta': attribute_obj,
+                    'result_va': sum_va
+                }
+
+
             return data
 
         for node in huc_navigation_tree.descendants:
             node.headwater_bool = node.is_leaf
 
         logger.debug("huc_navigation_tree ready at %s seconds" % (datetime.datetime.now() - startTime).total_seconds())
+
+        """
+        
+        2019-08-26 figure out how to add in the 'Specific Indicator to Aggregate'
+        
+        """
+        attribute_obj = None
+        if 'attribute_field_nm' in kwargs:
+            attribute_obj = WBDAttributes.objects.filter(field_nm=kwargs['attribute_field_nm'])[0]
+            # this adds the attribute data to each node (slow though)
+
+
+
+            Attribute().navigation_metrics(huc_navigation_tree, attribute_obj)
+
+            field_nm = attribute_obj.field_nm
+            if attribute_obj.units_tx == '%' and attribute_obj.statistic_cd == 'sum':
+                sum_va = get_attribute_avg(huc_navigation_tree, field_nm)
+                area_va = get_area(huc_navigation_tree) - huc_navigation_tree.area_sq_km
+                sum_va = 100 * sum_va / area_va
+            elif attribute_obj.units_tx == '%' and attribute_obj.statistic_cd == 'average':
+                sum_va = get_average(huc_navigation_tree, field_nm)
+            elif attribute_obj.units_tx == 'inches per year' and attribute_obj.statistic_cd == 'average':
+                sum_va = get_average(huc_navigation_tree, field_nm)
+            elif attribute_obj.statistic_cd == 'average':
+                sum_va = get_average(huc_navigation_tree, field_nm)
+            else:
+                sum_va = get_attribute_sum(huc_navigation_tree, field_nm)
+
+            sum_va = round(sum_va, 2)
+
+            data['aggregated_attribute'] = {
+                'attribute_field_nm': kwargs['attribute_field_nm'],
+                # 'attribute_meta': attribute_obj,
+                'result_va': sum_va
+            }
+            if 'attribute_only' in kwargs:
+                return data
 
         upstream_hu12_set = set()
 
@@ -536,7 +648,9 @@ class WBD(models.Model):
             elif 'download_attributes' in kwargs \
                     and (kwargs['download_attributes'] == 'metrics2016'
                             or kwargs['download_attributes'] == 'metrics2017'
-                            or kwargs['download_attributes'] == 'geography'):
+                            or kwargs['download_attributes'] == 'geography'
+                            or kwargs['download_attributes'] == 'wbd_navigation'
+            ):
                 # get this from the Attributes class
                 data['hu12_data'] = Attribute().metrics(huc_navigation_tree,
                                                         kwargs['download_attributes'])
@@ -596,7 +710,7 @@ class WBD(models.Model):
                 # in js get these back out via
                 upstream_list = []
 
-                # this is putting the 'base' in the list questionable
+                # this is putting the 'base node' in the list questionable
                 val_list = [huc_navigation_tree.name, ]
                 for att in valid_attribute_list:
                     if hasattr(huc_navigation_tree, att):
@@ -627,14 +741,6 @@ class WBD(models.Model):
                 data['hu12_data']['hu12_list'] = upstream_list
 
         logger.debug("finished all navigation at %s seconds" % (datetime.datetime.now() - startTime).total_seconds())
-
-        # upstream_huc12_dict = None
-        # if not 'attributes' in kwargs :
-        #     if upstream_hu12_set_len < 1000:
-        #         exporter = DictExporter()
-        #         data['upstream_huc12_dict'] = exporter.export(huc_navigation_tree)
-        #     else:
-        #         data['upstream_huc12_dict'] = {'warning': 'too many nodes to export as dict'}
 
         return data
 
@@ -791,18 +897,26 @@ class HuNavigator(models.Model):
 
 class WBDAttributes(models.Model):
 
-    row_nu = models.IntegerField("Row Nu", default=None, blank=True, null=True)
-    attribute_name = models.CharField('Attribute Name', max_length=124, default=None, blank=False, null=False)
-    source = models.CharField('Source', max_length=124, default=None, blank=False, null=False)
-    alias = models.CharField('Alias', max_length=124, default=None, blank=False, null=False)
-    description = models.CharField('Description', max_length=124, default=None, blank=True, null=True)
-    field_type = models.CharField('Field Type', max_length=24, default=None, blank=False, null=False)
-    is_served = models.BooleanField("Is served")
-    comments = models.CharField('Attribute Name', max_length=124, default=None, blank=True, null=True)
+    sort_nu = models.IntegerField("Row Nu", default=None, blank=True, null=True)
+    source_tx = models.CharField('Source', max_length=50, default=None, blank=False, null=False)
+
+    category_name = models.CharField('Category', max_length=124, default=None, blank=False, null=False)
+    rest_layer_name = models.CharField('Alias', max_length=256, default=None, blank=False, null=False)
+    label_tx = models.CharField('Label', max_length=124, default=None, blank=False, null=False)
+    field_nm = models.CharField('Attribute Name', max_length=124, default=None, blank=False, null=False)
+    statistic_cd= models.CharField('Statistic', max_length=25, default=None, blank=False, null=False)
+    units_tx = models.CharField('Units', max_length=50, default=None, blank=False, null=False)
+    description_tx = models.CharField('Description', max_length=1000, default=None, blank=True, null=True)
+    # field_type = models.CharField('Field Type', max_length=24, default=None, blank=False, null=False)
+    # is_served = models.BooleanField("Is served")
+    # comments = models.CharField('Attribute Name', max_length=124, default=None, blank=True, null=True)
 
     def __str__(self):
-        return self.source + ' - US-' + self.attribute_name
+        return self.source_tx + ' - US-' + self.field_nm
 
+    """
+        given an attribute_string, see if there is a source_tx, category_tx, or field_nm that match it
+    """
     def clean_attributes(self, attributes_string):
         if len(attributes_string) == 0 or attributes_string == None:
             return None
@@ -813,11 +927,11 @@ class WBDAttributes(models.Model):
                           'invalid_attributes': {}}
         for attribute in attribute_list:
             # see if it is an attribute set
-            att_set = WBDAttributes.objects.filter(source=attribute)
+            att_set = WBDAttributes.objects.filter(source_tx=attribute)
             if len(att_set):
                 sanitized_atts['valid_set'][attribute] = {'attribute_set': attribute, 'count_nu': len(att_set)}
             else:
-                att = WBDAttributes.objects.filter(attribute_name=attribute)
+                att = WBDAttributes.objects.filter(field_nm=attribute)
                 if len(att):
                     #
                     sanitized_atts['valid_attributes'][attribute] = att[0]
@@ -833,8 +947,8 @@ class WBDAttributes(models.Model):
         }
 
     class Meta:
-        ordering = ["row_nu"]
-        unique_together = (('source', 'attribute_name'),)
+        ordering = ["sort_nu"]
+        unique_together = (('source_tx', 'field_nm'),)
 
 
 
