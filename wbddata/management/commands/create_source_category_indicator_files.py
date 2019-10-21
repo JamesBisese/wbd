@@ -52,7 +52,7 @@ class Command(BaseCommand):
             #     continue
 
             print("{} -- {}".format(source_tx, source_obj['count_nu']))
-            path = r"C:\inetpub\wwwdjango\wbd\wbddata\static\data\{}/".format(source_tx)
+            path = os.path.join(settings.BASE_DIR, r"wbddata\static\data\{}/".format(source_tx))
             path = os.path.abspath(path)
 
             if not os.path.exists(path):
