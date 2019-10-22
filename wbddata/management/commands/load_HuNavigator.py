@@ -4,6 +4,7 @@ from django.conf import settings
 import os
 from datetime import datetime as dt
 import csv
+from django.db import transaction
 
 from wbddata.models import HuNavigator, WBD
 
@@ -60,20 +61,21 @@ class Command(BaseCommand):
 
                 nav_tree.add((huc_code, upstream_huc_code))
 
-        for n in sorted(nav_tree):
-            # print(n)
-            huc_code = n[0]
-            upstream_huc_code = n[1]
+        with transaction.atomic():
+            for n in sorted(nav_tree):
+                # print(n)
+                huc_code = n[0]
+                upstream_huc_code = n[1]
+                print(huc_code + '-- us' + upstream_huc_code)
 
-
-            hc = WBD.objects.filter(huc_code__exact=huc_code).first()
-            uhc = WBD.objects.filter(huc_code__exact=upstream_huc_code).first()
-            _, created = HuNavigator.objects.get_or_create(
-                huc_code=huc_code,
-                upstream_huc_code=upstream_huc_code,
-                huc_code_fk=hc,
-                upstream_huc_code_fk=uhc,
-            )
+                hc = WBD.objects.filter(huc_code__exact=huc_code).first()
+                uhc = WBD.objects.filter(huc_code__exact=upstream_huc_code).first()
+                _, created = HuNavigator.objects.get_or_create(
+                    huc_code=huc_code,
+                    upstream_huc_code=upstream_huc_code,
+                    huc_code_fk=hc,
+                    upstream_huc_code_fk=uhc,
+                )
 
         #TODO: delete the navigation cache
 

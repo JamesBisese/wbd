@@ -4,7 +4,6 @@ from django.conf import settings
 import os
 from datetime import datetime as dt
 import csv
-from adaptor.model import CsvDbModel
 
 """
 (venv) C:\inetpub\wwwdjango\wbd>python manage.py load_HUC
