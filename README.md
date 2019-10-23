@@ -1,6 +1,6 @@
 ## Synopsis
 
-NOT READY FOR REUSE.  THIS IS A TRAINING EXERCISE ONLY.  ONLY THE WBDDATA PART WORKS
+NOT READY FOR REUSE.  THIS IS AN INTERIM VERSION FOR TESTING DEPLOYMENT ISSUES.
 
 Python Django Rest Framework API implementation 
 of the Hydrologic Unit Code (HUC) and Watershed Boundary Dataset.  Provides a
