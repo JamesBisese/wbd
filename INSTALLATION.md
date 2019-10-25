@@ -22,18 +22,29 @@ I use a separate folder in inetpub to hold Django applications
 These are the packages required on the web server that are not covered in these notes
 
 1. `git` https://git-scm.com/download/win
+This is installed via a GUI
+In Select Components you can uncheck all options
+
 2. `IIS with FastCGI installed` https://docs.microsoft.com/en-us/iis/configuration/system.webserver/fastcgi/
 	
 ## Install Python
 
 Download Python 3.8.0 from https://www.python.org/downloads/ (25.2 MB)
 
-Install python version 3.8 into folder
+Install python version 3.8 into folder  
 	`C:\software\Python\Python38`
+
+Python is installed via a GUI
+You might have to run the installer as Admin
+In Optional Features only check 'pip'
+Use Advanced Options uncheck everything, but set the location to install.
+
+Customize install location  
+`C:\software\Python\Python38`
 
 Add python to System Environmental Variable 'Path'
 Include 2 folders
-	`C:\software\Python\Python38` and
+	`C:\software\Python\Python38` and  
 	`C:\software\Python\Python38\Scripts`
 	
 Install Python in folder
@@ -53,7 +64,16 @@ user.name@MACHINENAME C:\software\Python\Python38
 $ pip --version
 pip 19.3.1 from c:\software\python\python38\lib\site-packages\pip (python 3.8)
 ~~~~
-
+Install python package virtualenv
+~~~~
+user.name@MACHINENAME C:\software\Python\Python38
+$ pip install virtualenv
+Collecting virtualenv
+  Downloading https://files.pythonhosted.org/packages/c5/97/00dd42a0fc41e9016b23f07ec7f657f636cb672fad9cf72b80f8f65c6a46/virtualenv-16.7.7-py2.py3-none-any.whl (3.4MB)
+     |████████████████████████████████| 3.4MB 939kB/s
+Installing collected packages: virtualenv
+Successfully installed virtualenv-16.7.7
+~~~~
 
 
 ## Download a copy of the application from github
@@ -126,7 +146,7 @@ folder `C:\software\Python\virtualenvs\wbd` and will not affect the system-wide 
 The file `C:\inetpub\wwwdjango\wbd\requirements.txt` contains a list of all the external python packages needed  to run the django app
 
 From experience, I know that there is one package called `lxml` that you need to get a pre-compiled version for windows
-See: https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+See: 'https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml'
 
 On that page download `lxml-4.4.1-cp38-cp38-win32.whl` to 
 	`C:\downloads\lxml-4.4.1-cp38-cp38-win32.whl`
