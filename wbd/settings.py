@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_datatables',
+    'wbd',
     'wbdmap',
     'wbdchart',
     'wbddata',
@@ -166,7 +167,7 @@ LOGGING = {
         'developer': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'wbddata', 'static', 'log', 'debug_' + date.today().strftime('%d%m%Y') + '.log'),
+            'filename': os.path.join(BASE_DIR, 'log', 'debug_' + date.today().strftime('%Y%m%d') + '.log'),
             'formatter':'simple',
         }
     },
@@ -202,11 +203,11 @@ STATIC_URL = '/static/'
 # serve from a folder parallel to 'wbd' (top-most) folder
 STATIC_ROOT = (os.path.join(BASE_DIR, 'static'))
 
-STATICFILES_DIRS = (
-  os.path.join(BASE_DIR, 'wbd', 'static'),
-  os.path.join(BASE_DIR, 'wbdmap', 'static'),
-  os.path.join(BASE_DIR, 'wbdchart', 'static'),
-)
+# STATICFILES_DIRS = (
+#   os.path.join(BASE_DIR, 'wbd', 'static'),
+#   os.path.join(BASE_DIR, 'wbdmap', 'static'),
+#   os.path.join(BASE_DIR, 'wbdchart', 'static'),
+# )
 
 STATICFILES_FINDERS = (
   # 'django.contrib.staticfiles.finders.FileSystemFinder',
