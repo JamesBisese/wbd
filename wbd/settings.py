@@ -199,6 +199,7 @@ LOGGING = {
 
 STATIC_URL = '/static/'
 
+# serve from a folder parallel to 'wbd' (top-most) folder
 STATIC_ROOT = (os.path.join(BASE_DIR, 'static'))
 
 STATICFILES_DIRS = (
@@ -208,7 +209,7 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_FINDERS = (
-  'django.contrib.staticfiles.finders.FileSystemFinder',
+  # 'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 

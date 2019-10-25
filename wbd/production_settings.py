@@ -24,9 +24,9 @@ IIS_APP_ALIAS = 'wbd/'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'h9%1nbw#)xl(1(t@-0yyn#f*wym=_hy8et9pz8xofkgyw0#j-o'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost',]
+ALLOWED_HOSTS = ['localhost','divs704insweb1.tt.local',]
 
 STATIC_URL = '/' + IIS_APP_ALIAS + 'static/'
 

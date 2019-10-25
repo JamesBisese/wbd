@@ -355,10 +355,8 @@ Now run a command to collect all the files that will be
 served from IIS as 'static' files (not django application).
 Static files include images, javascript, and css.
 
-**Note:** *I need to fix the configuration issue causing these duplicates*
-
 ~~~~
-(wbd) user.name@MACHINENAME C:\inetpub\wwwdjango\wbd
+(wbd) james.bisese@DIVS704INSWEB1 C:\inetpub\wwwdjango\wbd
 $ python manage.py collectstatic
 
 You have requested to collect static files at the destination
@@ -370,33 +368,9 @@ This will overwrite existing files!
 Are you sure you want to do this?
 
 Type 'yes' to continue, or 'no' to cancel: yes
-Found another file with the destination path 'wbdmap\css\app.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\css\bootstrap.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\css\FloatingPane.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\css\nprogress.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\css\ResizeHandle.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\css\widget.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\images\enviroatlas_graphic_identifier.png'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\images\hourglass.gif'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\images\hourglass_md_wm.gif'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\images\hourglass_md_wmOLD.gif'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\images\tn-logo.svg'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\js\index.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\js\nprogress.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\js\urls.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdmap\js\urls_production.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\css\style.css'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\css\texture-noise.png'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\js\d3.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\js\d3.layout.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\js\makeTable.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
-Found another file with the destination path 'wbdchart\js\wbd_chart.js'. It will be ignored since only the first encountered file is collected. If this is not what you want, make sure every static file has a unique path.
 
-234 static files copied to 'C:\inetpub\wwwdjango\wbd\static'.
+222 static files copied to 'C:\inetpub\wwwdjango\wbd\static'.
 
-(wbd) user.name@MACHINENAME C:\inetpub\wwwdjango\wbd
-$(wbd) user.name@MACHINENAME C:\inetpub\wwwdjango\wbd
-# python manage.py collectstatic
 ~~~~
 
 ### Run the application using the django development server
