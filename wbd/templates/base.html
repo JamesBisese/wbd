@@ -2,7 +2,7 @@
 <html lang="en">
     {% load staticfiles %}
 
-
+{% load static %}
 
 <head>
     <meta charset="utf-8">
@@ -16,6 +16,7 @@
 
 
     {% block extra_css %}
+
     {% endblock extra_css %}
 
     <!-- Custom styles for this site -->
@@ -49,9 +50,18 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-dark">
 
 
-{#      <button class="navbar-toggler " type="button" data-toggle="collapse" data-target="#navbarsExample05" aria-controls="navbarsExample05" aria-expanded="false" aria-label="Toggle navigation">#}
-{#        <span class="navbar-toggler-icon"></span>#}
-{#      </button>#}
+		<div id="jsn-header" style="background:url({% static 'wbd/images/tt_header17.jpg' %}) no-repeat;">
+			<div id="jsn-logo"><a href="/go3/index.php" title="Tetra Tech Inc">
+
+
+			<img id="backgroundtest" src="{% static 'wbd/images/Tt_whitelogo.png' %}"  width="229" height="95" alt="My Tetra Tech - My Tetra Tech" />
+
+
+
+
+
+
+</a>
 
 
 
