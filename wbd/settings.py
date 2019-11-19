@@ -39,7 +39,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['!!!USE-VALUE-FROM-LOCAL-SETTINGS!!!',]
 
-
+LOGIN_REDIRECT_URL = '/admin'
 
 # Application definition
 

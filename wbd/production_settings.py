@@ -30,4 +30,4 @@ ALLOWED_HOSTS = ['localhost', '107.162.141.89', 'divs704insweb1.tt.local','insde
 
 STATIC_URL = '/' + IIS_APP_ALIAS + 'static/'
 
-
+LOGIN_REDIRECT_URL = '/' + IIS_APP_ALIAS + '/admin'
