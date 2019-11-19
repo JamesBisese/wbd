@@ -26,7 +26,7 @@ SECRET_KEY = 'h9%1nbw#)xl(1(t@-0yyn#f*wym=_hy8et9pz8xofkgyw0#j-o'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost','divs704insweb1.tt.local',]
+ALLOWED_HOSTS = ['localhost', '107.162.141.89', 'divs704insweb1.tt.local','insdev1.tetratech.com',]
 
 STATIC_URL = '/' + IIS_APP_ALIAS + 'static/'
 
