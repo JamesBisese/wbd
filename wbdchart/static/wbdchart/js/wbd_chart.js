@@ -8,7 +8,7 @@ var tree = d3.layout.tree().size([ height, width ]);
 
 var huc_service = "http://localhost/wbd-cgi/index.py"
 
-huc_service = "http://127.0.0.1:82/hu2/"
+huc_service = "http://127.0.0.1:82/hu2/?format=json&page_size=200"
 
 var diagonal = d3.svg.diagonal().projection(function(d)
 {
@@ -291,7 +291,7 @@ function toggle(d)
     }
     else if (!d.children && !d._children && d.huc_code && d.huc_code.length.toString() < 12)
     {
-        var url = '/huc/' + d.huc_code + '/drilldown/?page_size=10000';
+        var url = '/huc/' + d.huc_code + '/drilldown/?format=json';
 
         var childObjects;
 

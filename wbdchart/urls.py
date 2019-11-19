@@ -16,7 +16,13 @@ Including another URLconf
 
 from django.urls import path
 from .views import IndexChart
+
+"""
+    this tag makes all the urls reverse into 'wbdmap:{name}'
+"""
+app_name = 'wbdchart'
+
 urlpatterns = [
 
-    path('', IndexChart),
+    path('', IndexChart, name='index'),
 ]

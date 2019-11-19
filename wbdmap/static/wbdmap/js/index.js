@@ -25,8 +25,11 @@ require(
 	"esri/layers/ArcGISDynamicMapServiceLayer",  
 	"esri/layers/FeatureLayer",
 	"esri/renderers/SimpleRenderer",
+	"esri/SpatialReference",
 	"esri/tasks/query",
-	"esri/tasks/QueryTask", 
+	"esri/tasks/QueryTask",
+	"esri/tasks/GeometryService",
+	"esri/tasks/ProjectParameters",
 	"esri/request",
 	"dijit/layout/BorderContainer",
 	"dijit/layout/TabContainer",
@@ -47,7 +50,7 @@ function(
 	esriConfig, 
 	Map,
 	Point,
-	Extent, 
+	Extent,
 	Graphic, 
 	graphicsUtils, 
 	SimpleFillSymbol, 
@@ -56,8 +59,11 @@ function(
 	ArcGISDynamicMapServiceLayer, 
 	FeatureLayer,
 	SimpleRenderer,
+	SpatialReference,
 	Query, 
 	QueryTask,
+	GeometryService,
+	ProjectParameters,
 	esriRequest
 )
 {
@@ -68,6 +74,7 @@ function(
 	esriConfig.defaults.io.proxyUrl = "/proxy/";
 	esriConfig.defaults.io.corsDetection = true;
 	esriConfig.defaults.io.httpsDomains.push("watersgeo.epa.gov");
+	// esriConfig.defaults.io.httpsDomains.push("cida.usgs.gov"); //nhd
 	esriConfig.defaults.io.httpsDomains.push("127.0.0.1:86");
 	esriConfig.defaults.io.timeout = 50000; 
 	// 
@@ -79,6 +86,8 @@ function(
 		minZoom: 1,
 		zoom : 5
 	});
+	var outSR = 102100; // "YOUR_OUTPUT_COORDINATE_SYSTEM"; // `wkid {number}`
+	var geometryService = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
 
 	// add the results to the map
 	var results_json = {};
@@ -108,6 +117,9 @@ function(
 	navigator_url = NAVIGATOR_URL;
 
 	var NAVIGATOR_ACTIVE = true;
+
+	//NHD stuff
+	var nldiURL = "/nldi/"; // + HUC12 + "/navigate/UT?distance="
 
 	var map_click_point;
 	var map_click_huc_code;
@@ -683,6 +695,23 @@ function(
 			{
 				request.then(downstreamNavigationSucceeded, navigationFailed);
 			}
+
+
+			// var requestNHDLines = esriRequest({
+			//   url: nldiURL + huc_id ,
+			//
+			//   handleAs: "json"
+			// });
+			// NProgress.start();
+			//
+			// if (navigation_direction.toUpperCase() == 'UPSTREAM')
+			// {
+			// 	requestNHDLines.then(upstreamNHDNavigationSucceeded, navigationFailed);
+			// }
+			// else
+			// {
+			// 	requestNHDLines.then(downstreamNHDNavigationSucceeded, navigationFailed);
+			// }
 		}
 		else if (featHUC12.length > 1)
 		{
@@ -713,7 +742,132 @@ function(
 		
 		tableResults(results_json);
 		dojo.style(dom.byId("gridHUC12"), 'display', '');
-		
+
+		// this is handling NHD flowline
+		function upstreamNHDNavigationSucceeded(Qresults)
+		{
+			var t1 = performance.now();
+			console.log("++ nhd gis queries finished in " + (t1 - t0).toFixed(3) + "ms");
+			//console.log("exHUC12 queries finished: ", Qresults);
+
+			// huc_json = results_json.huc12;
+			// huc_json.pop();
+			//
+			// //sorry
+			// //var huc12_headwaters = results_json['huc12'][1]["NAVIGATION_RESULTS"]["navigation_data"]["results"]["upstream_hu12_headwaters_list"];
+			//
+			// var terminal_hu12 = results_json['huc12'][1]['NAVIGATION_RESULTS']['hu_data']['terminal_hu12_ds']['huc_code'];
+
+			// str = 'JSON: ' + JSON.stringify(results_json, null, 4);
+			// dom.byId("NavigationMessages").innerHTML = ""; // "<pre>" + str + '</pre>'; //  + tableResults(results_json.huc12);
+			// dom.byId("NavigateErrorMessage").innerHTML = '';
+			if (!Qresults.hasOwnProperty("features"))
+			{
+				console.log("nldi query failed.");
+			}
+
+			if (Qresults.features.length >= 1)
+			{
+				var projectParams = new ProjectParameters();
+
+
+				var features = Qresults.features;
+
+				// app.map.setExtent(graphicsUtils.graphicsExtent(features));
+
+				arrayUtils.forEach(features, function(feat)
+				{
+					//huc8_tx = feat.attributes.HUC_8 + ' ' + feat.attributes.HU_8_NAME;
+					//add_huc8_label(feat.geometry.getExtent().getCenter(), huc8_tx);
+
+					// feat.setSymbol(huc8_symbol());
+
+					var simpleLineSymbol = {
+					 type: "simple-line",
+					 color: [226, 119, 40], // orange
+					 width: 2
+				   };
+
+    				projectParams.geometries = [feat.geometry];
+    				projectParams.outSR = new SpatialReference({ wkid: outSR });
+					var projected_coords;
+					geometryService.project(projectParams, (result) => {
+					  projected_coords = result; // outputpoint first element of result array
+
+					});
+
+				   var polyline = {
+					 type: "polyline",
+					 paths: projected_coords
+				   };
+
+				   var polylineGraphic = new Graphic({
+					 geometry: polyline,
+					 symbol: simpleLineSymbol
+				   })
+
+				   // graphicsLayer.add(polylineGraphic);
+
+					app.map.graphics.add(polylineGraphic);
+				});
+				console.log("added " + features.length + " NHD line-features to map");
+			}
+			// else if (Qresults.length == 1)
+			// {
+			// 	featHUC12 = Qresults[0].features;
+			//
+			// 	if (featHUC12.length > 0){
+			// 		app.map.setExtent(graphicsUtils.graphicsExtent(featHUC12));
+			// 	}
+			//
+			// }
+
+			//featHUC12 = results[0].features;
+			// var huc12_feature_count = 0;
+			// arrayUtils.forEach(Qresults, function(featHUC12)
+			// {
+			// 	// this changed at some time 2019-04-26
+			// 	// if (featHUC12.hasOwnProperty('displayFieldName') & featHUC12['displayFieldName'] == "HU_12_NAME")
+			// 	if (featHUC12.features.length > 0
+			// 			&& featHUC12.features[0].attributes.hasOwnProperty([huc12_name_field_nm])) /* diff on waters and enviro */
+			// 	{
+			// 		//console.log('in HU_12_NAME');
+			// 		var myHUC12s = featHUC12;
+			// 		for (i=0; i < myHUC12s.features.length; i += 1)
+			// 		{
+			// 			huc12_feature_count += 1;
+			//
+			// 			var sym = huc12_symbol();
+			//
+			// 			var huc_code = myHUC12s.features[i]['attributes'][huc12_field_nm];
+			//
+			// 			if (hu12_headwater_list.includes(huc_code)){
+			// 				sym = huc12_headwater_symbol();
+			// 			}
+			// 			else if (huc_code == terminal_hu12){
+			// 				sym = huc12_terminal_symbol();
+			// 			}
+			// 			if (huc_code == map_click_huc_code){
+			// 				sym = huc12_map_clicked_symbol();
+			// 			}
+			//
+			// 			myHUC12s.features[i].setSymbol(sym);
+			//
+			// 			app.map.graphics.add(myHUC12s.features[i]);
+			//
+			// 		}
+			// 	}
+			//
+			//
+			// });
+			// console.log("added " + huc12_feature_count + " HUC12 features to map");
+			NProgress.done();
+			hideLoading();
+
+			// put the users click point back on the map
+			// add_click_point_graphic(map_click_point);
+		}
+
 		//
 		// this is using 'data' - the results of the REST query - NOT ArcGIS
 		//

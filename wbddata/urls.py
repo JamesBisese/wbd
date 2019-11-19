@@ -19,7 +19,8 @@ from django.conf.urls import url, include
 
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
-
+# from proxy.views import proxy_view
+# from django.views.decorators.csrf import csrf_exempt
 
 from .views import HUCRegionViewSet, HUCSubregionViewSet, \
     HUCAccountingUnitViewSet, HUCCatalogingUnitViewSet, HUCSubwatershedViewSet, \
@@ -30,7 +31,12 @@ from .views import HUCRegionViewSet, HUCSubregionViewSet, \
     DownloadMetrics2017MetaDataPage,\
     DownloadGeographyMetaDataPage
 
-# from .views import HUCSubwatershedList # WBDViewSet,
+# proxy this request
+# @csrf_exempt
+# def nldi_proxy(request, huc_code):
+# 	extra_requests_args = {}
+# 	remoteurl = 'http://cida.usgs.gov/nldi/huc12pp/' + huc_code + '/navigate/UT?distance='
+# 	return proxy_view(request, remoteurl, extra_requests_args)
 
 """
     this tag makes all the urls reverse into 'wbddata:{name}'
@@ -68,7 +74,7 @@ urlpatterns = [
 
     re_path(r'huc/(?P<huc_code>\d{12})/',  HUCSubwatershedViewSet.as_view({'get': 'retrieve'}), name='subwatershed-udetail'),
 
-
+    # re_path(r'nldi/(?P<huc_code>\d{12})', nldi_proxy),
     # alternate methodology
     # path(r'hu12List/', HUCSubwatershedList.as_view(), name='subwatershed-ulist'),
 
