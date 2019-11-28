@@ -229,7 +229,7 @@ class WBD(models.Model):
 
             logger.debug("storing data in cache1 at %s seconds" % (datetime.datetime.now() -
                                                                    startTime).total_seconds())
-            sys.setrecursionlimit(10000)
+            sys.setrecursionlimit(12000)
 
             cache1.set('navigation_tree', self.navigation_tree, timeout=None)
 
@@ -402,6 +402,9 @@ class WBD(models.Model):
         self.init_wbd_navigation_tree()
 
         logger.debug("init is done in %s seconds" % (datetime.datetime.now() - startTime).total_seconds())
+        # jab - 2019-11-26 added to prevent 500 error when recursion exceeds allowed default deoth
+        # TODO - figure  out the max recursion accually needed
+        sys.setrecursionlimit(10000)
 
         def get_distance(node):
             return (0 if node.distance_km < 0 else node.distance_km or 0) + sum(get_distance(child) for child in node.children)
