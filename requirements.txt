@@ -16,7 +16,7 @@ et-xmlfile==1.0.1
 idna==2.8
 itypes==1.1.0
 jdcal==1.4.1
-Jinja2==2.10.1
+Jinja2==2.11.3
 lxml==4.4.1
 MarkupSafe==1.1.1
 msgpack==0.6.2
